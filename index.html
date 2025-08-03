@@ -1,3341 +1,1740 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="es" class="h-full bg-base-200 text-base-content">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Temporizador de Entrenamiento</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Fitness Timer Pro</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/daisyui@3.7.0/dist/full.css" rel="stylesheet" type="text/css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <script>
+        tailwind.config = {
+            darkMode: "class",
+            plugins: [require("daisyui")],
+            daisyui: {
+                themes: ["luxury", "cyberpunk", "forest", "lofi", "corporate", "light", "abyss", "synthwave", "black", "dark"],
+                darkTheme: "luxury"
+            }
+        };
+    </script>
     <style>
         :root {
-            --primary-bg: #f8fafc;
-            --secondary-bg: #ffffff;
-            --sidebar-bg: #ffffff;
-            --text-primary: #1e293b;
-            --text-secondary: #64748b;
-            --border-color: #e2e8f0;
-            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-            --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-            --success: #10b981;
-            --warning: #f59e0b;
-            --danger: #ef4444;
-            --info: #3b82f6;
-            --purple: #8b5cf6;
-            --pink: #ec4899;
-            --orange: #f97316;
-            --teal: #14b8a6;
-            --cyan: #06b6d4;
-            --dark-bg: #0f172a;
-            --dark-sidebar: #1e293b;
-            --dark-text: #f1f5f9;
-            --dark-secondary: #94a3b8;
-            --dark-border: #334155;
-            
-            /* Temas personalizados */
-            --theme-primary: #3b82f6;
-            --theme-secondary: #8b5cf6;
-            --theme-accent: #10b981;
+            --led-on: #00fffc;
+            --led-off: rgba(0, 100, 100, 0.1);
+            --glow-intensity: 10px;
         }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
+        
+        .light-theme {
+            --led-on: #00a8a8;
+            --led-off: rgba(0, 0, 0, 0.05);
         }
-
-        body {
-            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-            background-color: var(--primary-bg);
-            color: var(--text-primary);
-            height: 100vh;
-            overflow: hidden;
+        
+        .segment {
+            position: absolute;
+            background: var(--led-off);
+            border-radius: 3px;
+            transition: all 0.1s;
         }
-
-        body.dark-mode {
-            --primary-bg: #0f172a;
-            --secondary-bg: #1e293b;
-            --sidebar-bg: #1e293b;
-            --text-primary: #f1f5f9;
-            --text-secondary: #94a3b8;
-            --border-color: #334155;
+        
+        .segment.on {
+            background: var(--led-on);
+            box-shadow: 0 0 var(--glow-intensity) var(--led-on);
         }
-
-        .app {
+        
+        .glow-effect .segment.on {
+            box-shadow: 0 0 15px 5px var(--led-on);
+        }
+        
+        .segment-a { width: 40px; height: 8px; top: 0; left: 10px; }
+        .segment-b { width: 8px; height: 40px; top: 8px; right: 0; }
+        .segment-c { width: 8px; height: 40px; bottom: 8px; right: 0; }
+        .segment-d { width: 40px; height: 8px; bottom: 0; left: 10px; }
+        .segment-e { width: 8px; height: 40px; bottom: 8px; left: 0; }
+        .segment-f { width: 8px; height: 40px; top: 8px; left: 0; }
+        .segment-g { width: 40px; height: 8px; top: 50%; left: 10px; transform: translateY(-50%); }
+        
+        .colon {
+            width: 15px;
             display: flex;
-            height: 100vh;
-            position: relative;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
-        /* Espacio reservado para sidebar */
-        .sidebar-reserved {
-            width: 80px;
-            height: 100vh;
-            position: fixed;
-            left: 0;
-            top: 0;
-            z-index: 800;
-        }
-
-        /* Floating Sidebar Toggle - Mejorado */
-        .sidebar-toggle {
-            position: fixed;
-            left: 30px;
-            top: 30px;
-            width: 50px;
-            height: 50px;
-            border-radius: 16px;
-            background-color: var(--sidebar-bg);
-            display: flex;
+            flex-direction: column;
             align-items: center;
             justify-content: center;
-            cursor: pointer;
-            box-shadow: var(--shadow-lg);
-            z-index: 1000;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            border: 2px solid var(--border-color);
-        }
-
-        .sidebar-toggle:hover {
-            transform: scale(1.1);
-            box-shadow: var(--shadow-xl);
-        }
-
-        /* Sidebar - Mejorado con mejor posicionamiento */
-        .sidebar {
-            position: fixed;
-            left: 20px;
-            top: 100px;
-            width: 260px;
-            height: calc(100vh - 120px);
-            background-color: var(--sidebar-bg);
-            box-shadow: var(--shadow-xl);
-            z-index: 900;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            padding: 24px;
-            border-radius: 20px;
-            border: 1px solid var(--border-color);
-            opacity: 0;
-            transform: translateX(-20px);
-            visibility: hidden;
-        }
-
-        .sidebar.active {
-            opacity: 1;
-            transform: translateX(0);
-            visibility: visible;
-        }
-
-        .sidebar-header {
-            padding-bottom: 20px;
-            border-bottom: 1px solid var(--border-color);
-            margin-bottom: 20px;
-        }
-
-        .sidebar-title {
-            font-size: 20px;
-            font-weight: 700;
-            color: var(--text-primary);
-        }
-
-        .sidebar-items {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-        }
-
-        .sidebar-item {
-            display: flex;
-            align-items: center;
-            padding: 16px 20px;
-            border-radius: 16px;
-            cursor: pointer;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            color: var(--text-secondary);
-            gap: 16px;
-            border: 2px solid transparent;
-        }
-
-        .sidebar-item:hover {
-            background-color: rgba(148, 163, 184, 0.1);
-            color: var(--text-primary);
-            transform: translateX(8px);
-        }
-
-        .sidebar-item.active {
-            background-color: rgba(59, 130, 246, 0.1);
-            color: var(--info);
-            border-color: var(--info);
-        }
-
-        .sidebar-item-icon {
-            width: 24px;
-            height: 24px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .sidebar-item-text {
-            font-size: 16px;
-            font-weight: 500;
-        }
-
-        /* Main Content - Ajustado para espacio reservado */
-        .main-content {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-            margin: 20px;
-            border-radius: 24px;
-            background-color: var(--secondary-bg);
-            box-shadow: var(--shadow-lg);
-            margin-left: 100px; /* Espacio para sidebar reservado */
-            transition: margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
-        .main-content.sidebar-open {
-            margin-left: 380px; /* 80px (reservado) + 260px (sidebar) + 40px (margen) */
-        }
-
-        /* Header */
-        .header {
-            padding: 24px;
-            border-bottom: 1px solid var(--border-color);
-            background-color: var(--secondary-bg);
-            border-radius: 24px 24px 0 0;
-        }
-
-        .header-content {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .header-title {
-            font-size: 24px;
-            font-weight: 700;
-            color: var(--text-primary);
-        }
-
-        .status-bar {
-            display: flex;
-            align-items: center;
-            gap: 16px;
-        }
-
-        .time-display {
-            font-size: 14px;
-            color: var(--text-secondary);
-            cursor: pointer;
-            padding: 8px 12px;
-            border-radius: 8px;
-            transition: all 0.2s ease;
-        }
-
-        .time-display:hover {
-            background-color: rgba(148, 163, 184, 0.1);
-            transform: scale(1.05);
-        }
-
-        .connection-status {
-            display: flex;
-            align-items: center;
-            padding: 4px 12px;
-            border-radius: 9999px;
-            font-size: 12px;
-            font-weight: 500;
-        }
-
-        .connection-status.online {
-            background-color: rgba(16, 185, 129, 0.1);
-            color: var(--success);
-        }
-
-        .connection-status.offline {
-            background-color: rgba(239, 68, 68, 0.1);
-            color: var(--danger);
-        }
-
-        .connection-icon {
-            margin-right: 4px;
-            width: 16px;
-            height: 16px;
-        }
-
-        /* Dashboard */
-        .dashboard {
-            flex: 1;
-            padding: 24px;
-            overflow: auto;
-            margin-bottom: 80px; /* Espacio para los paneles */
-        }
-
-        .dashboard-layout {
-            display: flex;
-            flex-direction: column;
-            gap: 24px;
+            margin: 0 5px;
             height: 100%;
         }
-
-        /* Zona Focal - Temporizador */
-        .zone-focal {
-            background: linear-gradient(135deg, var(--secondary-bg), #f1f5f9);
-            border-radius: 24px;
-            padding: 32px;
-            box-shadow: var(--shadow-lg);
-            border: 1px solid var(--border-color);
-            text-align: center;
-        }
-
-        .timer-display {
-            font-family: 'Courier New', monospace;
-            font-size: 96px;
-            font-weight: 700;
-            letter-spacing: 4px;
-            color: var(--text-primary);
-            margin-bottom: 24px;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
-            transition: all 0.3s ease;
-            cursor: pointer;
-        }
-
-        .timer-display:hover {
-            transform: scale(1.02);
-        }
-
-        /* Estado del Timer - Colores que cambian según el modo */
-        .timer-display.countdown {
-            color: var(--danger);
-        }
-
-        .timer-display.countup {
-            color: var(--success);
-        }
-
-        .timer-display.clock {
-            color: var(--info);
-        }
-
-        .timer-display.amrap {
-            color: var(--purple);
-        }
-
-        .timer-display.tabata {
-            color: var(--orange);
-        }
-
-        /* Zona de Acción - Controles */
-        .zone-accion {
-            display: flex;
-            justify-content: center;
-            gap: 24px;
-            margin: 24px 0;
-        }
-
-        .control-button {
-            width: 72px;
-            height: 72px;
-            border-radius: 50%;
-            border: none;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            box-shadow: var(--shadow);
-            font-size: 24px;
-        }
-
-        .play-button {
-            background: linear-gradient(135deg, var(--success), #059669);
-            color: white;
-        }
-
-        .pause-button {
-            background: linear-gradient(135deg, var(--warning), #d97706);
-            color: white;
-        }
-
-        .reset-button {
-            background: linear-gradient(135deg, var(--text-secondary), #475569);
-            color: white;
-        }
-
-        .control-button:hover {
-            transform: scale(1.1);
-            box-shadow: var(--shadow-lg);
-        }
-
-        /* Barra de Progreso */
-        .progress-container {
-            width: 100%;
+        
+        .colon-dot {
+            width: 8px;
             height: 8px;
-            background-color: rgba(148, 163, 184, 0.2);
-            border-radius: 4px;
-            margin: 24px 0;
-            overflow: hidden;
+            background: var(--led-on);
+            border-radius: 50%;
+            margin: 15px 0;
+            opacity: 0.7;
+        }
+        
+        @keyframes shake {
+            0% { transform: translateX(0); }
+            25% { transform: translateX(-3px); }
+            50% { transform: translateX(3px); }
+            75% { transform: translateX(-3px); }
+            100% { transform: translateX(0); }
+        }
+        
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(0, 255, 252, 0.4); }
+            70% { box-shadow: 0 0 0 10px rgba(0, 255, 252, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(0, 255, 252, 0); }
         }
 
-        .progress-bar {
+        .edit-mode .program-btn {
+            animation: pulse 2s infinite;
+        }
+        
+        .edit-mode .program-btn:hover {
+            animation: shake 0.5s ease infinite;
+            transform: translateY(0);
+        }
+        
+        .concentration-mode {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
             height: 100%;
-            background: linear-gradient(90deg, var(--info), var(--purple));
-            border-radius: 4px;
-            transition: width 0.3s ease;
-            width: 0%;
-        }
-
-        /* Zona de Información */
-        .zone-info {
-            text-align: center;
-            padding: 20px;
-            border-radius: 16px;
-            background-color: rgba(148, 163, 184, 0.1);
-            margin: 24px 0;
-        }
-
-        .program-info {
-            font-size: 16px;
-            color: var(--text-secondary);
-            margin-bottom: 12px;
-        }
-
-        .program-details {
-            font-size: 14px;
-            color: var(--text-primary);
-            font-weight: 500;
-        }
-
-        /* Zona de Selección - Programas */
-        .zone-seleccion {
-            background-color: var(--secondary-bg);
-            border-radius: 24px;
-            padding: 24px;
-            box-shadow: var(--shadow-lg);
-            border: 1px solid var(--border-color);
-        }
-
-        .programs-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 24px;
-        }
-
-        .programs-title {
-            font-size: 20px;
-            font-weight: 700;
-            color: var(--text-primary);
-        }
-
-        .programs-actions {
-            display: flex;
-            gap: 8px;
-        }
-
-        .programs-action-btn {
-            width: 36px;
-            height: 36px;
-            border-radius: 12px;
-            border: none;
-            background-color: rgba(148, 163, 184, 0.1);
-            color: var(--text-secondary);
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.2s ease;
-            font-size: 16px;
-        }
-
-        .programs-action-btn:hover {
-            background-color: rgba(148, 163, 184, 0.2);
-            color: var(--text-primary);
-            transform: translateY(-2px);
-        }
-
-        .programs-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-            gap: 16px;
-        }
-
-        .program-card {
-            background: linear-gradient(135deg, rgba(148, 163, 184, 0.1), rgba(148, 163, 184, 0.05));
-            border-radius: 16px;
-            padding: 20px 16px;
-            text-align: center;
-            cursor: pointer;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            border: 2px solid transparent;
-            position: relative;
-            user-select: none;
-            min-height: 130px;
+            background: rgba(0, 0, 0, 0.9);
+            z-index: 1000;
             display: flex;
             flex-direction: column;
             justify-content: center;
+            align-items: center;
+            padding: 2rem;
         }
-
-        .program-card:hover {
-            transform: translateY(-4px);
-            background: linear-gradient(135deg, rgba(148, 163, 184, 0.2), rgba(148, 163, 184, 0.1));
-            box-shadow: var(--shadow);
+        
+        .concentration-display {
+            transform: scale(1.5);
+            margin-bottom: 3rem;
         }
-
-        .program-card.selected {
-            border-color: var(--info);
-            background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(59, 130, 246, 0.05));
-            box-shadow: 0 0 0 2px var(--info), var(--shadow);
+        
+        .concentration-controls {
+            opacity: 0.3;
+            transition: opacity 0.3s;
         }
-
-        .program-favorite {
-            position: absolute;
-            top: 8px;
-            right: 8px;
-            color: var(--text-secondary);
-            font-size: 18px;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
-            background: none;
-            border: none;
-            width: 24px;
-            height: 24px;
+        
+        .concentration-controls:hover {
+            opacity: 1;
+        }
+        
+        .display-container {
+            background: rgba(15, 15, 25, 0.9);
+            border-radius: 16px;
+            padding: 15px 25px;
+            box-shadow: 
+                0 0 25px rgba(0, 0, 0, 0.6),
+                inset 0 0 10px rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(80, 80, 100, 0.3);
+            aspect-ratio: 16/6;
             display: flex;
             align-items: center;
             justify-content: center;
-            border-radius: 50%;
+            position: relative;
+            overflow: hidden;
         }
-
-        .program-favorite:hover {
-            color: var(--warning);
-            transform: scale(1.2);
-        }
-
-        .program-favorite.active {
-            color: var(--warning);
-        }
-
-        .program-icon {
-            font-size: 36px;
-            margin-bottom: 12px;
-        }
-
-        .program-title {
-            font-weight: 600;
-            font-size: 14px;
-            margin-bottom: 6px;
-            color: var(--text-primary);
-        }
-
-        .program-description {
-            font-size: 11px;
-            color: var(--text-secondary);
-            line-height: 1.3;
-        }
-
-        /* Drag and Drop - Mejorado */
-        .program-card.dragging {
-            opacity: 0.8;
-            transform: rotate(3deg) scale(1.05);
-            z-index: 1000;
-            box-shadow: var(--shadow-xl);
-            transition: all 0.2s ease;
-        }
-
-        .program-card.drag-over {
-            border-color: var(--info);
-            background: linear-gradient(135deg, rgba(59, 130, 246, 0.2), rgba(59, 130, 246, 0.1));
-            transform: scale(1.03);
-        }
-
-        /* Modal */
-        .modal {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
+        
+        .digits {
+            display: flex;
+            justify-content: center;
+            align-items: center;
             height: 100%;
-            background-color: rgba(0, 0, 0, 0.5);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 2000;
-            opacity: 0;
-            visibility: hidden;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
-        .modal.active {
-            opacity: 1;
-            visibility: visible;
-        }
-
-        .modal-content {
-            background-color: var(--secondary-bg);
-            border-radius: 24px;
-            padding: 32px;
-            width: 90%;
-            max-width: 500px;
-            max-height: 90vh;
-            overflow-y: auto;
-            box-shadow: var(--shadow-xl);
-            transform: scale(0.9) translateY(20px);
-            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            border: 1px solid var(--border-color);
-        }
-
-        .modal.active .modal-content {
-            transform: scale(1) translateY(0);
-        }
-
-        .modal-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 24px;
-        }
-
-        .modal-title {
-            font-size: 24px;
-            font-weight: 700;
-            color: var(--text-primary);
-        }
-
-        .modal-close {
-            background: none;
-            border: none;
-            font-size: 24px;
-            cursor: pointer;
-            color: var(--text-secondary);
-            width: 32px;
-            height: 32px;
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .modal-close:hover {
-            background-color: rgba(148, 163, 184, 0.1);
-            color: var(--text-primary);
-        }
-
-        .form-group {
-            margin-bottom: 24px;
-        }
-
-        .form-label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: 600;
-            color: var(--text-primary);
-        }
-
-        .form-input {
             width: 100%;
-            padding: 12px 16px;
-            border: 2px solid var(--border-color);
-            border-radius: 12px;
-            font-size: 16px;
-            background-color: var(--primary-bg);
-            color: var(--text-primary);
-            transition: border-color 0.2s ease;
+            position: relative;
+            padding: 5px 0;
         }
-
-        .form-input:focus {
-            outline: none;
-            border-color: var(--info);
-            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-        }
-
-        .form-select {
+        
+        .digit-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100%;
             width: 100%;
-            padding: 12px 16px;
-            border: 2px solid var(--border-color);
-            border-radius: 12px;
-            font-size: 16px;
-            background-color: var(--primary-bg);
-            color: var(--text-primary);
-            transition: border-color 0.2s ease;
+            padding: 0 5px;
         }
-
-        .form-select:focus {
-            outline: none;
-            border-color: var(--info);
-            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-        }
-
-        .form-buttons {
-            display: flex;
-            gap: 16px;
-            margin-top: 32px;
-        }
-
-        .btn {
-            flex: 1;
-            padding: 16px;
-            border: none;
-            border-radius: 12px;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s ease;
-        }
-
-        .btn-primary {
-            background: linear-gradient(135deg, var(--info), #2563eb);
-            color: white;
-        }
-
-        .btn-secondary {
-            background: linear-gradient(135deg, var(--text-secondary), #475569);
-            color: white;
-        }
-
-        .btn-success {
-            background: linear-gradient(135deg, var(--success), #059669);
-            color: white;
-        }
-
-        .btn:hover {
-            transform: translateY(-2px);
-            box-shadow: var(--shadow);
-        }
-
-        /* Settings Panel - Organizado por categorías */
-        .settings-panel {
-            position: fixed;
-            bottom: 20px;
-            left: 100px; /* Ajustado para espacio reservado */
-            width: 380px;
-            height: calc(100vh - 40px);
-            background-color: var(--secondary-bg);
-            box-shadow: var(--shadow-xl);
-            z-index: 1500;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            padding: 24px;
-            overflow-y: auto;
-            border-radius: 20px;
-            border: 1px solid var(--border-color);
-            opacity: 0;
-            transform: translateX(-20px);
-            visibility: hidden;
-        }
-
-        .settings-panel.active {
-            opacity: 1;
-            transform: translateX(0);
-            visibility: visible;
-        }
-
-        .settings-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 32px;
-        }
-
-        .settings-title {
-            font-size: 24px;
-            font-weight: 700;
-            color: var(--text-primary);
-        }
-
-        .settings-close {
-            background: none;
-            border: none;
-            font-size: 24px;
-            cursor: pointer;
-            color: var(--text-secondary);
-            width: 32px;
-            height: 32px;
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .settings-close:hover {
-            background-color: rgba(148, 163, 184, 0.1);
-            color: var(--text-primary);
-        }
-
-        .setting-category {
-            margin-bottom: 32px;
-        }
-
-        .category-title {
-            font-size: 18px;
-            font-weight: 600;
-            margin-bottom: 16px;
-            color: var(--text-primary);
-            padding-bottom: 8px;
-            border-bottom: 2px solid var(--border-color);
-        }
-
-        .setting-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 16px;
-            border-radius: 16px;
-            background-color: rgba(148, 163, 184, 0.1);
-            margin-bottom: 12px;
-            transition: all 0.2s ease;
-        }
-
-        .setting-item:hover {
-            background-color: rgba(148, 163, 184, 0.2);
-            transform: translateX(4px);
-        }
-
-        .setting-label {
-            font-weight: 500;
-            color: var(--text-primary);
-        }
-
-        .toggle-switch {
+        
+        .digit {
             position: relative;
-            display: inline-block;
-            width: 60px;
-            height: 34px;
+            width: 60px; 
+            height: 100px;
+            margin: 0 3px;
+            flex-shrink: 0;
         }
-
-        .toggle-switch input {
-            opacity: 0;
-            width: 0;
-            height: 0;
-        }
-
-        .slider {
+        
+        .fullscreen-btn {
             position: absolute;
-            cursor: pointer;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background-color: var(--text-secondary);
-            transition: .4s;
-            border-radius: 34px;
-        }
-
-        .slider:before {
-            position: absolute;
-            content: "";
-            height: 26px;
-            width: 26px;
-            left: 4px;
-            bottom: 4px;
-            background-color: white;
-            transition: .4s;
+            top: 10px;
+            right: 10px;
+            background: rgba(0, 150, 150, 0.3);
+            border: none;
             border-radius: 50%;
-        }
-
-        input:checked + .slider {
-            background: linear-gradient(135deg, var(--success), #059669);
-        }
-
-        input:checked + .slider:before {
-            transform: translateX(26px);
-        }
-
-        /* Theme Creator */
-        .theme-creator {
-            background: linear-gradient(135deg, rgba(148, 163, 184, 0.1), rgba(148, 163, 184, 0.05));
-            border-radius: 16px;
-            padding: 20px;
-            margin: 24px 0;
-        }
-
-        .color-picker {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            margin-bottom: 16px;
-        }
-
-        .color-preview {
-            width: 40px;
-            height: 40px;
-            border-radius: 8px;
-            border: 2px solid var(--border-color);
-        }
-
-        .color-input {
-            flex: 1;
-            padding: 12px 16px;
-            border: 2px solid var(--border-color);
-            border-radius: 12px;
-            font-size: 16px;
-            background-color: var(--primary-bg);
-            color: var(--text-primary);
-        }
-
-        /* Stats Panel - Timeline visual */
-        .stats-panel {
-            position: fixed;
-            bottom: 20px;
-            left: 100px; /* Ajustado para espacio reservado */
-            width: 380px;
-            height: calc(100vh - 40px);
-            background-color: var(--secondary-bg);
-            box-shadow: var(--shadow-xl);
-            z-index: 1500;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            padding: 24px;
-            overflow-y: auto;
-            border-radius: 20px;
-            border: 1px solid var(--border-color);
-            opacity: 0;
-            transform: translateX(-20px);
-            visibility: hidden;
-        }
-
-        .stats-panel.active {
-            opacity: 1;
-            transform: translateX(0);
-            visibility: visible;
-        }
-
-        .stats-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 32px;
-        }
-
-        .stats-title {
-            font-size: 24px;
-            font-weight: 700;
-            color: var(--text-primary);
-        }
-
-        .stats-close {
-            background: none;
-            border: none;
-            font-size: 24px;
-            cursor: pointer;
-            color: var(--text-secondary);
-            width: 32px;
-            height: 32px;
-            border-radius: 8px;
+            width: 30px;
+            height: 30px;
             display: flex;
             align-items: center;
             justify-content: center;
+            color: var(--led-on);
+            cursor: pointer;
+            opacity: 0.3;
+            transition: opacity 0.3s;
+            z-index: 10;
         }
-
-        .stats-close:hover {
-            background-color: rgba(148, 163, 184, 0.1);
-            color: var(--text-primary);
+        
+        .fullscreen-btn:hover {
+            opacity: 1;
         }
-
-        /* Timeline Visual */
-        .timeline {
+        
+        .custom-program-card {
             position: relative;
-            padding-left: 20px;
-            margin-bottom: 32px;
         }
-
-        .timeline::before {
-            content: '';
+        
+        .delete-custom {
             position: absolute;
-            left: 8px;
-            top: 0;
-            bottom: 0;
-            width: 2px;
-            background: linear-gradient(to bottom, var(--info), var(--success));
-        }
-
-        .timeline-item {
-            position: relative;
-            margin-bottom: 24px;
-            padding-left: 24px;
-        }
-
-        .timeline-item::before {
-            content: '';
-            position: absolute;
-            left: -32px;
-            top: 8px;
-            width: 16px;
-            height: 16px;
+            top: -5px;
+            right: -5px;
+            background: #ff0000;
+            color: white;
             border-radius: 50%;
-            background: var(--info);
-            border: 3px solid var(--secondary-bg);
-            box-shadow: 0 0 0 2px var(--info);
-        }
-
-        .timeline-date {
-            font-size: 12px;
-            color: var(--text-secondary);
-            font-weight: 500;
-            margin-bottom: 4px;
-        }
-
-        .timeline-content {
-            background-color: rgba(148, 163, 184, 0.1);
-            border-radius: 12px;
-            padding: 16px;
-            border-left: 4px solid var(--info);
-        }
-
-        .timeline-program {
-            font-weight: 600;
-            color: var(--text-primary);
-            margin-bottom: 8px;
-        }
-
-        .timeline-duration {
-            color: var(--text-secondary);
-            font-size: 14px;
-        }
-
-        /* Stats Summary */
-        .stats-summary {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 16px;
-            margin-bottom: 24px;
-        }
-
-        .stat-card {
-            background: linear-gradient(135deg, rgba(148, 163, 184, 0.1), rgba(148, 163, 184, 0.05));
-            border-radius: 12px;
-            padding: 16px;
-            text-align: center;
-        }
-
-        .stat-value {
-            font-size: 24px;
-            font-weight: 700;
-            color: var(--info);
-            margin-bottom: 4px;
-        }
-
-        .stat-label {
-            font-size: 12px;
-            color: var(--text-secondary);
-        }
-
-        /* Heatmap */
-        .heatmap-section {
-            background: linear-gradient(135deg, rgba(148, 163, 184, 0.1), rgba(148, 163, 184, 0.05));
-            border-radius: 16px;
-            padding: 20px;
-            margin: 24px 0;
-        }
-
-        .heatmap-title {
-            font-size: 18px;
-            font-weight: 600;
-            color: var(--text-primary);
-            margin-bottom: 16px;
-        }
-
-        .heatmap-grid {
-            display: grid;
-            grid-template-columns: repeat(7, 1fr);
-            gap: 4px;
-        }
-
-        .heatmap-day {
-            aspect-ratio: 1;
-            border-radius: 4px;
-            display: flex;
+            width: 20px;
+            height: 20px;
+            display: none;
             align-items: center;
             justify-content: center;
-            font-size: 10px;
-            color: transparent;
-            transition: all 0.2s ease;
-        }
-
-        .heatmap-day:hover {
-            transform: scale(1.1);
-            color: var(--text-primary);
-        }
-
-        .heatmap-day.level-0 { background-color: rgba(148, 163, 184, 0.1); }
-        .heatmap-day.level-1 { background-color: rgba(59, 130, 246, 0.3); }
-        .heatmap-day.level-2 { background-color: rgba(59, 130, 246, 0.5); }
-        .heatmap-day.level-3 { background-color: rgba(59, 130, 246, 0.7); }
-        .heatmap-day.level-4 { background-color: rgba(59, 130, 246, 0.9); }
-
-        .heatmap-legend {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            margin-top: 16px;
             font-size: 12px;
-            color: var(--text-secondary);
-        }
-
-        .legend-item {
-            display: flex;
-            align-items: center;
-            gap: 4px;
-        }
-
-        .legend-color {
-            width: 16px;
-            height: 16px;
-            border-radius: 2px;
-        }
-
-        /* Workouts Panel */
-        .workouts-panel {
-            position: fixed;
-            bottom: 20px;
-            left: 100px; /* Ajustado para espacio reservado */
-            width: 380px;
-            height: calc(100vh - 40px);
-            background-color: var(--secondary-bg);
-            box-shadow: var(--shadow-xl);
-            z-index: 1500;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            padding: 24px;
-            overflow-y: auto;
-            border-radius: 20px;
-            border: 1px solid var(--border-color);
-            opacity: 0;
-            transform: translateX(-20px);
-            visibility: hidden;
-        }
-
-        .workouts-panel.active {
-            opacity: 1;
-            transform: translateX(0);
-            visibility: visible;
-        }
-
-        .workouts-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 32px;
-        }
-
-        .workouts-title {
-            font-size: 24px;
-            font-weight: 700;
-            color: var(--text-primary);
-        }
-
-        .workouts-close {
-            background: none;
-            border: none;
-            font-size: 24px;
             cursor: pointer;
-            color: var(--text-secondary);
-            width: 32px;
-            height: 32px;
-            border-radius: 8px;
+        }
+        
+        .edit-mode .custom-program-card .delete-custom {
             display: flex;
-            align-items: center;
-            justify-content: center;
         }
-
-        .workouts-close:hover {
-            background-color: rgba(148, 163, 184, 0.1);
-            color: var(--text-primary);
+        
+        .program-btn.active {
+            background: #3b82f6 !important;
+            color: white !important;
+            transform: scale(1.05);
+            box-shadow: 0 0 15px rgba(59, 130, 246, 0.5);
         }
-
-        .workouts-content {
-            margin-bottom: 20px;
+        
+        .program-btn.running {
+            animation: pulse 1.5s infinite;
         }
-
-        .workout-item {
-            background: linear-gradient(135deg, rgba(148, 163, 184, 0.1), rgba(148, 163, 184, 0.05));
-            border-radius: 16px;
-            padding: 16px;
-            margin-bottom: 16px;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            border: 2px solid transparent;
+        
+        .program-info {
+            font-size: 0.75rem;
+            color: #9ca3af;
+            margin-top: 0.25rem;
         }
-
-        .workout-item:hover {
-            background: linear-gradient(135deg, rgba(148, 163, 184, 0.2), rgba(148, 163, 184, 0.1));
-            transform: translateY(-2px);
-            border-color: var(--info);
-        }
-
-        .workout-name {
-            font-weight: 600;
-            color: var(--text-primary);
-            margin-bottom: 8px;
-            font-size: 16px;
-        }
-
-        .workout-description {
-            color: var(--text-secondary);
-            font-size: 14px;
-            margin-bottom: 12px;
-        }
-
-        .workout-stats {
-            display: flex;
-            gap: 16px;
-            margin-bottom: 12px;
-        }
-
-        .workout-stat {
-            font-size: 12px;
-            color: var(--text-secondary);
-        }
-
-        .workout-actions {
-            display: flex;
-            gap: 8px;
-        }
-
-        .workout-action-btn {
-            padding: 8px 12px;
-            border-radius: 8px;
-            border: none;
-            background-color: rgba(148, 163, 184, 0.1);
-            color: var(--text-secondary);
-            cursor: pointer;
-            font-size: 12px;
-            transition: all 0.2s ease;
-        }
-
-        .workout-action-btn:hover {
-            background-color: rgba(148, 163, 184, 0.2);
-            color: var(--text-primary);
-        }
-
-        /* Workout Editor */
-        .workout-editor {
-            position: fixed;
-            bottom: 20px;
-            left: 100px; /* Ajustado para espacio reservado */
-            width: 380px;
-            height: calc(100vh - 40px);
-            background-color: var(--secondary-bg);
-            box-shadow: var(--shadow-xl);
-            z-index: 2000;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            padding: 24px;
-            overflow-y: auto;
-            border-radius: 20px;
-            border: 1px solid var(--border-color);
-            opacity: 0;
-            transform: translateX(-20px);
-            visibility: hidden;
-        }
-
-        .workout-editor.active {
-            opacity: 1;
-            transform: translateX(0);
-            visibility: visible;
-        }
-
-        .editor-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 32px;
-        }
-
-        .editor-title {
-            font-size: 24px;
-            font-weight: 700;
-            color: var(--text-primary);
-        }
-
-        .editor-close {
-            background: none;
-            border: none;
-            font-size: 24px;
-            cursor: pointer;
-            color: var(--text-secondary);
-            width: 32px;
-            height: 32px;
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .editor-close:hover {
-            background-color: rgba(148, 163, 184, 0.1);
-            color: var(--text-primary);
-        }
-
-        .editor-content {
-            height: calc(100% - 100px);
-        }
-
-        .programs-list {
-            background: linear-gradient(135deg, rgba(148, 163, 184, 0.1), rgba(148, 163, 184, 0.05));
-            border-radius: 16px;
-            padding: 16px;
-            overflow-y: auto;
-            max-height: 300px;
-            margin-bottom: 24px;
-        }
-
-        .workout-sequence {
-            background: linear-gradient(135deg, rgba(148, 163, 184, 0.1), rgba(148, 163, 184, 0.05));
-            border-radius: 16px;
-            padding: 16px;
-            overflow-y: auto;
-            max-height: 200px;
-            margin-bottom: 24px;
-        }
-
-        .sequence-item {
-            background-color: var(--secondary-bg);
-            border-radius: 12px;
-            padding: 16px;
-            margin-bottom: 12px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border: 2px solid var(--border-color);
-            box-shadow: var(--shadow);
-            transition: all 0.2s ease;
-        }
-
-        .sequence-item:hover {
-            transform: translateX(4px);
-            border-color: var(--info);
-        }
-
-        .sequence-item.draggable {
-            cursor: move;
-        }
-
-        .sequence-item.dragging {
-            opacity: 0.7;
-            transform: rotate(2deg);
-        }
-
-        .sequence-controls {
-            display: flex;
-            gap: 8px;
-        }
-
-        .sequence-btn {
-            width: 32px;
-            height: 32px;
-            border-radius: 8px;
-            border: none;
-            background-color: rgba(148, 163, 184, 0.2);
-            color: var(--text-secondary);
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 14px;
-            transition: all 0.2s ease;
-        }
-
-        .sequence-btn:hover {
-            background-color: rgba(148, 163, 184, 0.3);
-            color: var(--text-primary);
-            transform: scale(1.1);
-        }
-
-        .editor-actions {
-            display: flex;
-            gap: 16px;
-            margin-top: 24px;
-        }
-
-        /* Preview Section */
-        .preview-section {
-            background: linear-gradient(135deg, rgba(148, 163, 184, 0.1), rgba(148, 163, 184, 0.05));
-            border-radius: 16px;
-            padding: 20px;
-            margin-top: 24px;
-        }
-
-        .preview-title {
-            font-size: 18px;
-            font-weight: 600;
-            color: var(--text-primary);
-            margin-bottom: 16px;
-        }
-
-        .preview-timeline {
-            display: flex;
-            gap: 12px;
-            overflow-x: auto;
-            padding: 12px 0;
-        }
-
-        .preview-item {
-            min-width: 120px;
-            background-color: var(--secondary-bg);
-            border-radius: 12px;
-            padding: 12px;
-            text-align: center;
-            border: 2px solid var(--border-color);
-        }
-
-        .preview-icon {
-            font-size: 24px;
-            margin-bottom: 8px;
-        }
-
-        .preview-name {
-            font-size: 12px;
-            font-weight: 500;
-            color: var(--text-primary);
-            margin-bottom: 4px;
-        }
-
-        .preview-time {
-            font-size: 11px;
-            color: var(--text-secondary);
-        }
-
-        /* Program Creator */
-        .program-creator {
-            position: fixed;
-            bottom: 20px;
-            left: 100px; /* Ajustado para espacio reservado */
-            width: 380px;
-            height: calc(100vh - 40px);
-            background-color: var(--secondary-bg);
-            box-shadow: var(--shadow-xl);
-            z-index: 2000;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            padding: 24px;
-            overflow-y: auto;
-            border-radius: 20px;
-            border: 1px solid var(--border-color);
-            opacity: 0;
-            transform: translateX(-20px);
-            visibility: hidden;
-        }
-
-        .program-creator.active {
-            opacity: 1;
-            transform: translateX(0);
-            visibility: visible;
-        }
-
-        .creator-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 32px;
-        }
-
-        .creator-title {
-            font-size: 24px;
-            font-weight: 700;
-            color: var(--text-primary);
-        }
-
-        .creator-close {
-            background: none;
-            border: none;
-            font-size: 24px;
-            cursor: pointer;
-            color: var(--text-secondary);
-            width: 32px;
-            height: 32px;
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .creator-close:hover {
-            background-color: rgba(148, 163, 184, 0.1);
-            color: var(--text-primary);
-        }
-
-        .creator-form {
-            margin-bottom: 24px;
-        }
-
-        .creator-actions {
-            display: flex;
-            gap: 16px;
-            margin-top: 24px;
-        }
-
-        .config-section {
-            background: linear-gradient(135deg, rgba(148, 163, 184, 0.1), rgba(148, 163, 184, 0.05));
-            border-radius: 12px;
-            padding: 16px;
-            margin: 16px 0;
-        }
-
-        .config-title {
-            font-size: 16px;
-            font-weight: 600;
-            color: var(--text-primary);
-            margin-bottom: 12px;
-        }
-
-        /* Responsive Design */
-        @media (max-width: 1200px) {
-            .zone-focal {
-                padding: 24px;
-            }
-            
-            .timer-display {
-                font-size: 72px;
-            }
-            
-            .sidebar {
-                left: 15px;
-                top: 90px;
-                width: 240px;
-                padding: 20px;
-            }
-            
-            .settings-panel, .stats-panel, .workouts-panel, .workout-editor, .program-creator {
-                width: 340px;
-                height: calc(100vh - 30px);
-                bottom: 15px;
-                left: 100px;
-            }
-            
-            .workout-editor, .program-creator {
-                width: 340px;
-                left: 100px;
-            }
-        }
-
-        @media (max-width: 768px) {
-            .header-content {
-                flex-direction: column;
-                gap: 16px;
-                align-items: flex-start;
-            }
-            
-            .timer-display {
-                font-size: 48px;
-            }
-            
-            .zone-accion {
-                gap: 16px;
-            }
-            
-            .control-button {
-                width: 60px;
-                height: 60px;
-                font-size: 20px;
-            }
-            
-            .main-content {
-                margin: 10px;
-                border-radius: 16px;
-                margin-left: 90px;
-            }
-            
-            .main-content.sidebar-open {
-                margin-left: 350px;
-            }
-            
-            .header {
-                padding: 16px;
-                border-radius: 16px 16px 0 0;
-            }
-            
-            .dashboard {
-                padding: 16px;
-            }
-            
-            .zone-focal, .zone-seleccion {
-                padding: 20px;
-                border-radius: 16px;
-            }
-            
-            .sidebar-toggle {
-                left: 15px;
-                top: 15px;
+        
+        @media (max-width: 480px) {
+            .digit {
                 width: 45px;
-                height: 45px;
+                height: 75px;
             }
             
-            .sidebar {
-                left: 10px;
-                top: 80px;
-                width: 220px;
-                padding: 16px;
+            .segment-a { width: 30px; height: 6px; left: 7px; }
+            .segment-b { width: 6px; height: 30px; top: 6px; }
+            .segment-c { width: 6px; height: 30px; bottom: 6px; }
+            .segment-d { width: 30px; height: 6px; left: 7px; }
+            .segment-e { width: 6px; height: 30px; bottom: 6px; }
+            .segment-f { width: 6px; height: 30px; top: 6px; }
+            .segment-g { width: 30px; height: 6px; left: 7px; }
+            
+            .colon {
+                width: 12px;
             }
             
-            .settings-panel, .stats-panel, .workouts-panel, .workout-editor, .program-creator {
-                width: calc(100vw - 30px);
-                left: 15px;
-                right: 15px;
-                transform: none;
-            }
-            
-            .programs-grid {
-                grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+            .colon-dot {
+                width: 6px;
+                height: 6px;
+                margin: 12px 0;
             }
         }
     </style>
 </head>
-<body>
-    <!-- Espacio reservado para sidebar -->
-    <div class="sidebar-reserved"></div>
-
-    <!-- Floating Sidebar Toggle -->
-    <div class="sidebar-toggle" id="sidebarToggle">
-        ☰
-    </div>
-
-    <!-- Sidebar -->
-    <div class="sidebar" id="sidebar">
-        <div class="sidebar-header">
-            <h2 class="sidebar-title">Menú</h2>
+<body class="h-full flex flex-col glow-effect">
+    <!-- Navbar -->
+    <nav class="navbar bg-base-300 px-4 py-3 flex justify-between items-center shadow-md sticky top-0 z-50">
+        <div class="app-name text-xl font-bold text-primary flex items-center gap-2">
+            <i class="fas fa-dumbbell"></i>
+            FITNESS TIMER PRO
         </div>
-        <div class="sidebar-items">
-            <div class="sidebar-item active" id="dashboardBtn">
-                <div class="sidebar-item-icon">🏠</div>
-                <div class="sidebar-item-text">Dashboard</div>
-            </div>
-            <div class="sidebar-item" id="workoutsBtn">
-                <div class="sidebar-item-icon">🏋️</div>
-                <div class="sidebar-item-text">Workouts</div>
-            </div>
-            <div class="sidebar-item" id="statsBtn">
-                <div class="sidebar-item-icon">📊</div>
-                <div class="sidebar-item-text">Historial</div>
-            </div>
-            <div class="sidebar-item" id="createProgramBtn">
-                <div class="sidebar-item-icon">➕</div>
-                <div class="sidebar-item-text">Crear Programa</div>
-            </div>
-            <div class="sidebar-item" id="settingsBtn">
-                <div class="sidebar-item-icon">⚙️</div>
-                <div class="sidebar-item-text">Configuración</div>
-            </div>
-            <div class="sidebar-item" id="darkModeBtn">
-                <div class="sidebar-item-icon">🌓</div>
-                <div class="sidebar-item-text" id="darkModeText">Modo Oscuro</div>
+        <div class="nav-actions flex items-center gap-3">
+            <button id="global-config-btn" class="btn btn-ghost btn-circle" title="Configuración global">
+                <i class="fas fa-cog"></i>
+            </button>
+            <div class="wifi-status badge badge-outline badge-primary gap-2">
+                <i class="fas fa-wifi"></i>
+                <span>Conectado</span>
             </div>
         </div>
-    </div>
-
-    <!-- Main Content -->
-    <div class="main-content" id="mainContent">
-        <!-- Header -->
-        <header class="header">
-            <div class="header-content">
-                <h1 class="header-title">Tu Temporizador de Entrenamiento</h1>
-                <div class="status-bar">
-                    <div class="time-display" id="currentTime">00:00:00</div>
-                    <div class="connection-status online" id="connectionStatus">
-                        <span>📶 Online</span>
-                    </div>
-                </div>
-            </div>
-        </header>
-
-        <!-- Dashboard - Organización por zonas -->
-        <main class="dashboard">
-            <div class="dashboard-layout">
-                <!-- Zona Focal: Temporizador grande y central -->
-                <div class="zone-focal">
-                    <div class="timer-display" id="timerDisplay">00:00</div>
-                    
-                    <!-- Barra de Progreso -->
-                    <div class="progress-container">
-                        <div class="progress-bar" id="progressBar"></div>
-                    </div>
-                    
-                    <!-- Zona de Acción: Controles principales -->
-                    <div class="zone-accion">
-                        <button class="control-button play-button" id="playButton">
-                            ▶️
-                        </button>
-                        <button class="control-button pause-button" id="pauseButton">
-                            ⏸️
-                        </button>
-                        <button class="control-button reset-button" id="resetButton">
-                            🔄
-                        </button>
-                    </div>
-                    
-                    <!-- Zona de Información: Detalles del programa -->
-                    <div class="zone-info">
-                        <div class="program-info" id="programInfo">
-                            Selecciona un programa de entrenamiento
-                        </div>
-                        <div class="program-details" id="programDetails">
-                            <!-- Detalles específicos del programa -->
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Zona de Selección: Programas en cuadrícula -->
-                <div class="zone-seleccion">
-                    <div class="programs-header">
-                        <h2 class="programs-title">Programas de Entrenamiento</h2>
-                        <div class="programs-actions">
-                            <button class="programs-action-btn" id="favoritesBtn" title="Favoritos">
-                                ⭐
-                            </button>
-                            <button class="programs-action-btn" id="refreshBtn" title="Actualizar">
-                                🔄
-                            </button>
-                        </div>
-                    </div>
-                    <div class="programs-grid" id="programsGrid">
-                        <!-- Programas se generarán dinámicamente -->
-                    </div>
-                </div>
-
-                <!-- Heatmap Section -->
-                <div class="heatmap-section">
-                    <h3 class="heatmap-title">Actividad Semanal</h3>
-                    <div class="heatmap-grid" id="heatmapGrid">
-                        <!-- Heatmap se generará dinámicamente -->
-                    </div>
-                    <div class="heatmap-legend">
-                        <span>Menos</span>
-                        <div class="legend-item">
-                            <div class="legend-color" style="background-color: rgba(148, 163, 184, 0.1);"></div>
-                            <span>0</span>
-                        </div>
-                        <div class="legend-item">
-                            <div class="legend-color" style="background-color: rgba(59, 130, 246, 0.3);"></div>
-                            <span>1</span>
-                        </div>
-                        <div class="legend-item">
-                            <div class="legend-color" style="background-color: rgba(59, 130, 246, 0.5);"></div>
-                            <span>2</span>
-                        </div>
-                        <div class="legend-item">
-                            <div class="legend-color" style="background-color: rgba(59, 130, 246, 0.7);"></div>
-                            <span>3</span>
-                        </div>
-                        <div class="legend-item">
-                            <div class="legend-color" style="background-color: rgba(59, 130, 246, 0.9);"></div>
-                            <span>4+</span>
-                        </div>
-                        <span>Más</span>
-                    </div>
-                </div>
-            </div>
-        </main>
-    </div>
-
-    <!-- Modal para configuración de programas -->
-    <div class="modal" id="programModal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2 class="modal-title" id="modalTitle">Configurar Programa</h2>
-                <button class="modal-close" id="modalClose">&times;</button>
-            </div>
-            <div id="modalBody">
-                <!-- Contenido del modal se generará dinámicamente -->
-            </div>
-        </div>
-    </div>
-
-    <!-- Panel de Configuración - Organizado por categorías -->
-    <div class="settings-panel" id="settingsPanel">
-        <div class="settings-header">
-            <h2 class="settings-title">Configuración</h2>
-            <button class="settings-close" id="settingsClose">&times;</button>
+    </nav>
+    
+    <!-- Contenido principal -->
+    <main class="container mx-auto p-4 max-w-lg flex-1 flex flex-col">
+        <!-- Display principal optimizado -->
+        <div class="display-container relative">
+            <button class="fullscreen-btn" id="fullscreen-btn">
+                <i class="fas fa-expand"></i>
+            </button>
+            <div class="digits" id="display"></div>
         </div>
         
-        <!-- Categoría: Sonidos -->
-        <div class="setting-category">
-            <h3 class="category-title">Sonidos</h3>
-            <div class="setting-item">
-                <span class="setting-label">Sonido de Inicio</span>
-                <label class="toggle-switch">
-                    <input type="checkbox" id="soundStart" checked>
-                    <span class="slider"></span>
-                </label>
+        <!-- Botón de acción principal inteligente -->
+        <button id="action-btn" class="btn btn-primary btn-lg w-full my-4">Iniciar</button>
+        
+        <!-- Programas de entrenamiento -->
+        <div class="programs-section bg-base-100 rounded-2xl p-4 shadow-lg border border-base-300 relative">
+            <div class="edit-corner absolute top-0 right-0 w-10 h-10 flex items-center justify-center bg-primary text-primary-content rounded-bl-2xl cursor-pointer" id="edit-corner">
+                <i class="fas fa-pencil-alt"></i>
             </div>
-            <div class="setting-item">
-                <span class="setting-label">Sonido de Finalización</span>
-                <label class="toggle-switch">
-                    <input type="checkbox" id="soundEnd" checked>
-                    <span class="slider"></span>
-                </label>
+            
+            <div class="section-header mb-4">
+                <h2 class="section-title text-lg font-semibold text-center">
+                    Programas de Entrenamiento
+                </h2>
             </div>
-            <div class="setting-item">
-                <span class="setting-label">Sonido de Alerta</span>
-                <label class="toggle-switch">
-                    <input type="checkbox" id="soundAlert" checked>
-                    <span class="slider"></span>
-                </label>
+            <div class="programs grid grid-cols-3 gap-3" id="programs-container">
+                <div class="program-btn aspect-square bg-base-200 rounded-xl p-2 text-center cursor-pointer transition-all" data-program="clock">
+                    <div class="btn-text">Reloj</div>
+                    <div class="program-info">Hora actual</div>
+                </div>
+                <div class="program-btn aspect-square bg-base-200 rounded-xl p-2 text-center cursor-pointer transition-all" data-program="stopwatch">
+                    <div class="btn-text">Cronómetro</div>
+                    <div class="program-info">Cuenta ascendente</div>
+                </div>
+                <div class="program-btn aspect-square bg-base-200 rounded-xl p-2 text-center cursor-pointer transition-all" data-program="count-up">
+                    <div class="btn-text">Contador Asc.</div>
+                    <div class="program-info">Hasta límite</div>
+                </div>
+                <div class="program-btn aspect-square bg-base-200 rounded-xl p-2 text-center cursor-pointer transition-all" data-program="count-down">
+                    <div class="btn-text">Contador Desc.</div>
+                    <div class="program-info">Desde inicial</div>
+                </div>
+                <div class="program-btn aspect-square bg-base-200 rounded-xl p-2 text-center cursor-pointer transition-all" data-program="amrap">
+                    <div class="btn-text">AMRAP</div>
+                    <div class="program-info">Tantas rondas</div>
+                </div>
+                <div class="program-btn aspect-square bg-base-200 rounded-xl p-2 text-center cursor-pointer transition-all" data-program="tabata">
+                    <div class="btn-text">TABATA</div>
+                    <div class="program-info">20s trabajo/10s desc</div>
+                </div>
+                <div class="program-btn aspect-square bg-base-200 rounded-xl p-2 text-center cursor-pointer transition-all" data-program="emom">
+                    <div class="btn-text">EMOM</div>
+                    <div class="program-info">Cada minuto</div>
+                </div>
+                <div class="program-btn aspect-square bg-base-200 rounded-xl p-2 text-center cursor-pointer transition-all" data-program="hiit">
+                    <div class="btn-text">HIIT</div>
+                    <div class="program-info">Entrenamiento intenso</div>
+                </div>
+                <div class="program-btn aspect-square bg-base-200 rounded-xl p-2 text-center cursor-pointer transition-all" data-program="for-time">
+                    <div class="btn-text">For Time</div>
+                    <div class="program-info">Tiempo total</div>
+                </div>
+                <div class="program-btn custom hidden aspect-square bg-base-200 border-2 border-dashed border-primary rounded-xl p-3 text-center cursor-pointer transition-all" data-program="custom">
+                    <div class="custom-program-text text-primary font-semibold text-sm">
+                        <i class="fas fa-plus-circle"></i>
+                        Crear programa
+                    </div>
+                </div>
             </div>
         </div>
-        
-        <!-- Categoría: Visual -->
-        <div class="setting-category">
-            <h3 class="category-title">Visual</h3>
-            <div class="setting-item">
-                <span class="setting-label">Animaciones</span>
-                <label class="toggle-switch">
-                    <input type="checkbox" id="animations" checked>
-                    <span class="slider"></span>
-                </label>
+    </main>
+    
+    <!-- Footer -->
+    <footer class="footer footer-center p-4 bg-base-300 text-base-content">
+        <aside>
+            <p>Conectado a dispositivo físico • Versión 2.5</p>
+        </aside>
+    </footer>
+
+    <!-- Modales -->
+    <!-- Modal de configuración global -->
+    <dialog id="config-modal" class="modal">
+        <div class="modal-box">
+            <h3 class="font-bold text-lg">Configuración Global</h3>
+            <div class="py-4">
+                <div class="form-control">
+                    <label class="label">
+                        <span class="label-text">Tema de color</span>
+                    </label>
+                    <select id="themeSwitcher" class="select select-bordered">
+                        <option value="luxury">Luxury</option>
+                        <option value="cyberpunk">Cyberpunk</option>
+                        <option value="forest">Forest</option>
+                        <option value="lofi">Lofi</option>
+                        <option value="corporate">Corporate</option>
+                        <option value="light">Light</option>
+                        <option value="abyss">Abyss</option>
+                        <option value="synthwave">Synthwave</option>
+                        <option value="black">Black</option>
+                        <option value="dark">Dark</option>
+                    </select>
+                </div>
+                
+                <div class="form-control mt-4">
+                    <label class="label cursor-pointer justify-start gap-4">
+                        <span class="label-text">Sonidos</span> 
+                        <input type="checkbox" class="toggle toggle-primary" checked />
+                    </label>
+                </div>
+                
+                <div class="form-control mt-4">
+                    <label class="label cursor-pointer justify-start gap-4">
+                        <span class="label-text">Efecto retroiluminación</span> 
+                        <input type="checkbox" id="glow-effect-toggle" class="toggle toggle-primary" checked />
+                    </label>
+                </div>
+                
+                <div class="form-control mt-4">
+                    <label class="label">
+                        <span class="label-text">Intensidad de LEDs</span>
+                    </label>
+                    <input type="range" min="1" max="10" value="8" class="range range-primary" id="led-intensity" />
+                </div>
             </div>
-            <div class="setting-item">
-                <span class="setting-label">Pantalla Completa</span>
-                <label class="toggle-switch">
-                    <input type="checkbox" id="fullscreen">
-                    <span class="slider"></span>
-                </label>
+            <div class="modal-action">
+                <form method="dialog">
+                    <button class="btn btn-ghost">Cancelar</button>
+                    <button class="btn btn-primary" id="save-config">Guardar</button>
+                </form>
             </div>
         </div>
-        
-        <!-- Categoría: Temas Personalizados -->
-        <div class="setting-category">
-            <h3 class="category-title">Temas Personalizados</h3>
-            <div class="theme-creator">
-                <div class="color-picker">
-                    <div class="color-preview" id="primaryPreview" style="background-color: var(--theme-primary);"></div>
-                    <input type="color" class="color-input" id="primaryColor" value="#3b82f6">
-                    <span>Color Primario</span>
+    </dialog>
+
+    <!-- Modal de creación de programas -->
+    <dialog id="create-program-modal" class="modal">
+        <div class="modal-box max-w-md w-full">
+            <form method="dialog" id="programForm">
+                <header class="flex justify-between items-center pb-2">
+                    <h3 class="font-bold text-lg">Crear programa</h3>
+                    <button type="button" class="btn btn-circle btn-ghost btn-sm" id="closeDialogBtn">
+                        ×
+                    </button>
+                </header>
+                <div class="space-y-3">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
+                        <input
+                            type="text"
+                            id="program-name"
+                            placeholder="Nombre del programa"
+                            required
+                            class="input input-bordered input-sm w-full text-sm"
+                        />
+                        <select
+                            id="countdown"
+                            class="select select-bordered select-sm w-full text-sm"
+                        >
+                            <option value="0">Sin cuenta regresiva</option>
+                            <option value="3">3 segundos</option>
+                            <option value="5">5 segundos</option>
+                            <option value="10">10 segundos</option>
+                            <option value="15">15 segundos</option>
+                            <option value="20">20 segundos</option>
+                            <option value="30">30 segundos</option>
+                        </select>
+                    </div>
+                    <textarea
+                        id="program-description"
+                        placeholder="Descripción del programa (opcional)"
+                        class="textarea textarea-bordered textarea-sm w-full text-sm"
+                    ></textarea>
                 </div>
-                <div class="color-picker">
-                    <div class="color-preview" id="secondaryPreview" style="background-color: var(--theme-secondary);"></div>
-                    <input type="color" class="color-input" id="secondaryColor" value="#8b5cf6">
-                    <span>Color Secundario</span>
+                <div class="mt-3">
+                    <h4 class="mb-2 font-semibold text-sm">Bloques de tiempo:</h4>
+                    <div
+                        id="blockList"
+                        class="block-list-container border border-dashed border-transparent"
+                    ></div>
                 </div>
-                <div class="color-picker">
-                    <div class="color-preview" id="accentPreview" style="background-color: var(--theme-accent);"></div>
-                    <input type="color" class="color-input" id="accentColor" value="#10b981">
-                    <span>Color de Acento</span>
+                <div class="mt-3 flex gap-2 justify-center">
+                    <button
+                        type="button"
+                        id="addMainBlockBtn"
+                        class="btn btn-outline btn-sm w-full"
+                    >
+                        + Añadir Bloque
+                    </button>
                 </div>
-                <button class="btn btn-success" id="applyTheme" style="width: 100%; margin-top: 16px;">
-                    Aplicar Tema
-                </button>
+                <div class="modal-action mt-3">
+                    <button
+                        type="button"
+                        id="cancelCreate"
+                        class="btn btn-ghost btn-sm"
+                    >
+                        Cancelar
+                    </button>
+                    <button type="submit" class="btn btn-primary btn-sm">
+                        Guardar
+                    </button>
+                </div>
+            </form>
+        </div>
+    </dialog>
+
+    <!-- Modales de configuración de programas -->
+    <!-- Modal Contador Ascendente -->
+    <dialog id="config-count-up-modal" class="modal">
+        <div class="modal-box">
+            <h3 class="font-bold text-lg">Contador Ascendente</h3>
+            <div class="py-4">
+                <div class="form-control">
+                    <label class="label">
+                        <span class="label-text">Tiempo máximo (mm:ss)</span>
+                    </label>
+                    <input type="text" id="count-up-max" class="input input-bordered" placeholder="00:00" value="05:00">
+                </div>
+                <div class="collapse collapse-arrow mt-4">
+                    <input type="checkbox" class="peer" />
+                    <div class="collapse-title bg-base-200 text-sm font-medium">
+                        <i class="fas fa-info-circle mr-2"></i> ¿Qué es el Contador Ascendente?
+                    </div>
+                    <div class="collapse-content bg-base-100"> 
+                        <p class="py-2">El contador ascendente comienza en 00:00 y cuenta hacia arriba hasta el tiempo máximo que configures. Es útil para medir cuánto tiempo llevas en una actividad.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-action">
+                <button class="btn btn-ghost" id="cancel-count-up">Cancelar</button>
+                <button class="btn btn-primary" id="apply-count-up">Aplicar</button>
             </div>
         </div>
-        
-        <!-- Categoría: Historial -->
-        <div class="setting-category">
-            <h3 class="category-title">Historial</h3>
-            <div class="setting-item">
-                <span class="setting-label">Guardar Sesiones</span>
-                <label class="toggle-switch">
-                    <input type="checkbox" id="saveHistory" checked>
-                    <span class="slider"></span>
-                </label>
+    </dialog>
+
+    <!-- Modal Contador Descendente -->
+    <dialog id="config-count-down-modal" class="modal">
+        <div class="modal-box">
+            <h3 class="font-bold text-lg">Contador Descendente</h3>
+            <div class="py-4">
+                <div class="form-control">
+                    <label class="label">
+                        <span class="label-text">Tiempo inicial (mm:ss)</span>
+                    </label>
+                    <input type="text" id="count-down-init" class="input input-bordered" placeholder="00:00" value="05:00">
+                </div>
+                <div class="collapse collapse-arrow mt-4">
+                    <input type="checkbox" class="peer" />
+                    <div class="collapse-title bg-base-200 text-sm font-medium">
+                        <i class="fas fa-info-circle mr-2"></i> ¿Qué es el Contador Descendente?
+                    </div>
+                    <div class="collapse-content bg-base-100"> 
+                        <p class="py-2">Comienza en el tiempo configurado y cuenta hacia abajo hasta 00:00. Ideal para ejercicios con tiempo límite.</p>
+                    </div>
+                </div>
             </div>
-            <button class="btn btn-secondary" id="clearHistoryBtn" style="width: 100%; margin-top: 16px;">
-                Limpiar Historial
+            <div class="modal-action">
+                <button class="btn btn-ghost" id="cancel-count-down">Cancelar</button>
+                <button class="btn btn-primary" id="apply-count-down">Aplicar</button>
+            </div>
+        </div>
+    </dialog>
+
+    <!-- Modal AMRAP -->
+    <dialog id="config-amrap-modal" class="modal">
+        <div class="modal-box">
+            <h3 class="font-bold text-lg">Configurar AMRAP</h3>
+            <div class="py-4">
+                <div class="form-control">
+                    <label class="label">
+                        <span class="label-text">Duración (mm:ss)</span>
+                    </label>
+                    <input type="text" id="amrap-duration" class="input input-bordered" placeholder="00:00" value="05:00">
+                </div>
+                <div class="collapse collapse-arrow mt-4">
+                    <input type="checkbox" class="peer" />
+                    <div class="collapse-title bg-base-200 text-sm font-medium">
+                        <i class="fas fa-info-circle mr-2"></i> ¿Qué es AMRAP?
+                    </div>
+                    <div class="collapse-content bg-base-100"> 
+                        <p class="py-2">AMRAP (As Many Rounds As Possible): Completa tantas rondas como sea posible de un circuito en el tiempo establecido. El tiempo corre en cuenta regresiva.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-action">
+                <button class="btn btn-ghost" id="cancel-amrap">Cancelar</button>
+                <button class="btn btn-primary" id="apply-amrap">Aplicar</button>
+            </div>
+        </div>
+    </dialog>
+
+    <!-- Modal EMOM -->
+    <dialog id="config-emom-modal" class="modal">
+        <div class="modal-box">
+            <h3 class="font-bold text-lg">Configurar EMOM</h3>
+            <div class="py-4">
+                <div class="form-control">
+                    <label class="label">
+                        <span class="label-text">Duración total (minutos)</span>
+                    </label>
+                    <input type="number" id="emom-total" class="input input-bordered" min="1" max="60" value="10">
+                </div>
+                <div class="form-control mt-4">
+                    <label class="label">
+                        <span class="label-text">Repeticiones por minuto</span>
+                    </label>
+                    <input type="number" id="emom-reps" class="input input-bordered" min="1" max="20" value="10">
+                </div>
+                <div class="collapse collapse-arrow mt-4">
+                    <input type="checkbox" class="peer" />
+                    <div class="collapse-title bg-base-200 text-sm font-medium">
+                        <i class="fas fa-info-circle mr-2"></i> ¿Qué es EMOM?
+                    </div>
+                    <div class="collapse-content bg-base-100"> 
+                        <p class="py-2">EMOM (Every Minute On the Minute): Realiza los ejercicios al inicio de cada minuto. El tiempo restante del minuto es para descanso. El contador es descendente.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-action">
+                <button class="btn btn-ghost" id="cancel-emom">Cancelar</button>
+                <button class="btn btn-primary" id="apply-emom">Aplicar</button>
+            </div>
+        </div>
+    </dialog>
+
+    <!-- Modal HIIT -->
+    <dialog id="config-hiit-modal" class="modal">
+        <div class="modal-box">
+            <h3 class="font-bold text-lg">Configurar HIIT</h3>
+            <div class="py-4">
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="form-control">
+                        <label class="label">
+                            <span class="label-text">Calentamiento</span>
+                        </label>
+                        <select id="hiit-warmup" class="select select-bordered">
+                            <option value="0">0 min</option>
+                            <option value="3">3 min</option>
+                            <option value="5" selected>5 min</option>
+                            <option value="7">7 min</option>
+                            <option value="10">10 min</option>
+                        </select>
+                    </div>
+                    <div class="form-control">
+                        <label class="label">
+                            <span class="label-text">Trabajo intenso</span>
+                        </label>
+                        <select id="hiit-work" class="select select-bordered">
+                            <option value="20" selected>20 s</option>
+                            <option value="30">30 s</option>
+                            <option value="40">40 s</option>
+                            <option value="45">45 s</option>
+                        </select>
+                    </div>
+                    <div class="form-control">
+                        <label class="label">
+                            <span class="label-text">Descanso</span>
+                        </label>
+                        <select id="hiit-rest" class="select select-bordered">
+                            <option value="10" selected>10 s</option>
+                            <option value="15">15 s</option>
+                            <option value="20">20 s</option>
+                            <option value="30">30 s</option>
+                        </select>
+                    </div>
+                    <div class="form-control">
+                        <label class="label">
+                            <span class="label-text">Repeticiones</span>
+                        </label>
+                        <select id="hiit-rounds" class="select select-bordered">
+                            <option value="4">4</option>
+                            <option value="6">6</option>
+                            <option value="8" selected>8</option>
+                            <option value="10">10</option>
+                        </select>
+                    </div>
+                    <div class="form-control">
+                        <label class="label">
+                            <span class="label-text">Enfriamiento</span>
+                        </label>
+                        <select id="hiit-cooldown" class="select select-bordered">
+                            <option value="0">0 min</option>
+                            <option value="3">3 min</option>
+                            <option value="5" selected>5 min</option>
+                            <option value="7">7 min</option>
+                        </select>
+                    </div>
+                    <div class="form-control">
+                        <label class="label">
+                            <span class="label-text">Dirección</span>
+                        </label>
+                        <div class="flex items-center gap-2">
+                            <input type="radio" name="hiit-direction" id="hiit-down" value="down" class="radio radio-primary" checked>
+                            <label for="hiit-down">Descendente</label>
+                            <input type="radio" name="hiit-direction" id="hiit-up" value="up" class="radio radio-primary">
+                            <label for="hiit-up">Ascendente</label>
+                        </div>
+                    </div>
+                </div>
+                <div class="collapse collapse-arrow mt-4">
+                    <input type="checkbox" class="peer" />
+                    <div class="collapse-title bg-base-200 text-sm font-medium">
+                        <i class="fas fa-info-circle mr-2"></i> ¿Qué es HIIT?
+                    </div>
+                    <div class="collapse-content bg-base-100"> 
+                        <p class="py-2">HIIT (High Intensity Interval Training): Alterna períodos de ejercicio intenso con descanso. Este temporizador maneja calentamiento, ciclos de trabajo/descanso y enfriamiento.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-action">
+                <button class="btn btn-ghost" id="cancel-hiit">Cancelar</button>
+                <button class="btn btn-primary" id="apply-hiit">Aplicar</button>
+            </div>
+        </div>
+    </dialog>
+
+    <!-- Modal TABATA -->
+    <dialog id="config-tabata-modal" class="modal">
+        <div class="modal-box">
+            <h3 class="font-bold text-lg">Configurar TABATA</h3>
+            <div class="py-4">
+                <div class="grid grid-cols-3 gap-4">
+                    <div class="form-control">
+                        <label class="label">
+                            <span class="label-text">Rondas</span>
+                        </label>
+                        <input type="number" id="tabata-rounds" class="input input-bordered" min="1" max="20" value="8">
+                    </div>
+                    <div class="form-control">
+                        <label class="label">
+                            <span class="label-text">Trabajo (s)</span>
+                        </label>
+                        <input type="number" id="tabata-work" class="input input-bordered" min="5" max="60" value="20">
+                    </div>
+                    <div class="form-control">
+                        <label class="label">
+                            <span class="label-text">Descanso (s)</span>
+                        </label>
+                        <input type="number" id="tabata-rest" class="input input-bordered" min="5" max="60" value="10">
+                    </div>
+                </div>
+                <div class="collapse collapse-arrow mt-4">
+                    <input type="checkbox" class="peer" />
+                    <div class="collapse-title bg-base-200 text-sm font-medium">
+                        <i class="fas fa-info-circle mr-2"></i> ¿Qué es TABATA?
+                    </div>
+                    <div class="collapse-content bg-base-100"> 
+                        <p class="py-2">Protocolo de 20 segundos de trabajo intenso seguidos de 10 segundos de descanso, repetido por 8 rondas (4 minutos totales). Puedes personalizar estos valores.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-action">
+                <button class="btn btn-ghost" id="cancel-tabata">Cancelar</button>
+                <button class="btn btn-primary" id="apply-tabata">Aplicar</button>
+            </div>
+        </div>
+    </dialog>
+
+    <!-- Modo concentración -->
+    <div class="concentration-mode hidden" id="concentration-mode">
+        <div class="concentration-display" id="concentration-display"></div>
+        <div class="concentration-controls flex gap-4">
+            <button class="btn btn-primary" id="concentration-action-btn">
+                <i class="fas fa-play"></i>
+            </button>
+            <button class="btn btn-ghost text-white" id="minimize-btn">
+                <i class="fas fa-compress"></i> Minimizar
             </button>
         </div>
     </div>
 
-    <!-- Panel de Historial - Timeline visual -->
-    <div class="stats-panel" id="statsPanel">
-        <div class="stats-header">
-            <h2 class="stats-title">Historial</h2>
-            <button class="stats-close" id="statsClose">&times;</button>
+    <!-- Plantillas para bloques -->
+    <template id="main-block-template">
+      <article
+        class="card mb-2 shadow hover:shadow-lg transition-all duration-200 bg-base-300 border border-base-content/20 main-block"
+      >
+        <div class="card-body p-2 relative">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center flex-grow">
+              <button
+                type="button"
+                class="btn btn-xs btn-ghost mr-1"
+                data-action="toggle-content"
+              >
+                ▼
+              </button>
+              <h3
+                class="font-bold text-base flex-grow cursor-pointer"
+                data-action="edit-title"
+              >
+                Bloque
+              </h3>
+            </div>
+            <button
+              type="button"
+              class="btn btn-xs btn-ghost ml-auto"
+              aria-label="Eliminar bloque"
+              data-action="delete-block"
+            >
+              ×
+            </button>
+          </div>
+          <div
+            class="content hidden mt-2 pt-2 border-t border-base-content/10 flex flex-col gap-2"
+          >
+            <div class="flex items-center">
+              <select
+                class="select select-sm select-bordered w-full"
+                data-field="repeat"
+              ></select>
+            </div>
+            <h5 class="text-xs font-semibold">Sub Bloques de tiempo:</h5>
+            <div
+              class="sub-block-list-container block-list-container border border-dashed border-transparent rounded"
+            ></div>
+            <button
+              type="button"
+              class="btn btn-outline btn-xs w-full"
+              data-action="add-sub-block"
+            >
+              + Añadir Sub Bloque
+            </button>
+          </div>
         </div>
-        
-        <!-- Resumen de estadísticas -->
-        <div class="stats-summary">
-            <div class="stat-card">
-                <div class="stat-value" id="totalSessions">0</div>
-                <div class="stat-label">Sesiones</div>
+      </article>
+    </template>
+    
+    <template id="sub-block-template">
+      <article
+        class="card mb-1 shadow hover:shadow-lg transition-all duration-200 bg-base-100 border border-base-content/10 block-item"
+      >
+        <div class="card-body p-1 pt-2 relative">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center flex-grow">
+              <button
+                type="button"
+                class="btn btn-xs btn-ghost mr-1"
+                data-action="toggle-content"
+              >
+                ▼
+              </button>
+              <h3
+                class="text-sm font-medium flex-grow cursor-pointer"
+                data-action="edit-title"
+              >
+                Sub Bloque
+              </h3>
             </div>
-            <div class="stat-card">
-                <div class="stat-value" id="totalTime">0</div>
-                <div class="stat-label">Horas</div>
+            <button
+              type="button"
+              class="btn btn-xs btn-ghost ml-auto"
+              aria-label="Eliminar bloque"
+              data-action="delete-block"
+            >
+              ×
+            </button>
+          </div>
+          <div class="content hidden mt-1 pt-1 border-t border-base-content/10">
+            <div class="flex flex-col gap-1">
+              <div
+                class="flex flex-wrap justify-evenly items-center gap-1 w-full min-w-0"
+              >
+                <div class="flex justify-center min-w-0 w-16">
+                  <input
+                    type="text"
+                    placeholder="Tiempo"
+                    class="input input-xs input-bordered min-w-[3rem] max-w-[4.5rem] text-center text-xs"
+                    data-field="time"
+                  />
+                </div>
+                <div class="flex justify-center min-w-0 w-16">
+                  <input
+                    type="text"
+                    placeholder="Aviso"
+                    class="input input-xs input-bordered min-w-[3rem] max-w-[4.5rem] text-center text-xs"
+                    data-field="warning"
+                  />
+                </div>
+                <div class="relative flex justify-center min-w-0">
+                  <div class="absolute -top-3.5 left-10 z-20 tooltip tooltip-left tooltip-info tooltip-click" 
+                       data-tip="Elige la dirección del tiempo: ascendente (sube) o descendente (baja).">
+                    <button type="button" 
+                            class="btn p-0 min-h-[0.85rem] h-[0.85rem] w-[0.85rem] 
+                                   border border-base-content/20 bg-base-200 text-base-content/70 
+                                   rounded-full hover:bg-base-300 hover:text-base-content 
+                                   transition-all duration-150">
+                      <i class="fas fa-info text-[0.55rem]"></i>
+                    </button>
+                  </div>
+                  
+                  <div class="flex rounded-full border border-base-content/10 bg-base-100">
+                    <button
+                      type="button"
+                      class="btn btn-ghost btn-xs text-base px-1 py-0.5 rounded-l-full !rounded-r-none"
+                      data-action="set-direction"
+                      data-value="up"
+                    >
+                      <i class="fas fa-arrow-up text-xs"></i>
+                    </button>
+                    <button
+                      type="button"
+                      class="btn btn-ghost btn-xs text-base px-1 py-0.5 rounded-r-full !rounded-l-none"
+                      data-action="set-direction"
+                      data-value="down"
+                    >
+                      <i class="fas fa-arrow-down text-xs"></i>
+                    </button>
+                    <input type="hidden" data-field="direction" value="up" />
+                  </div>
+                </div>
+              </div>
             </div>
-            <div class="stat-card">
-                <div class="stat-value" id="favoriteProgram">-</div>
-                <div class="stat-label">Favorito</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-value" id="thisWeek">0</div>
-                <div class="stat-label">Esta Semana</div>
-            </div>
+          </div>
         </div>
-        
-        <!-- Timeline visual -->
-        <h3 class="category-title">Actividad Reciente</h3>
-        <div class="timeline" id="timeline">
-            <!-- Items del timeline se generarán dinámicamente -->
-        </div>
-    </div>
-
-    <!-- Panel de Workouts -->
-    <div class="workouts-panel" id="workoutsPanel">
-        <div class="workouts-header">
-            <h2 class="workouts-title">Workouts</h2>
-            <button class="workouts-close" id="workoutsClose">&times;</button>
-        </div>
-        <div class="workouts-content">
-            <div class="workout-item" id="createWorkoutBtn">
-                <div class="workout-name">Crear Nuevo Workout</div>
-                <div class="workout-description">Diseña tu propio entrenamiento personalizado</div>
-                <div class="workout-stats">
-                    <div class="workout-stat">⏱️ Personalizado</div>
-                    <div class="workout-stat">📊 Sin datos</div>
-                </div>
-                <div class="workout-actions">
-                    <button class="workout-action-btn">➕ Crear</button>
-                </div>
-            </div>
-            <div class="workout-item">
-                <div class="workout-name">Workout Combinado</div>
-                <div class="workout-description">Combina múltiples programas con intervalos</div>
-                <div class="workout-stats">
-                    <div class="workout-stat">⏱️ 30 min</div>
-                    <div class="workout-stat">📊 85% completado</div>
-                </div>
-                <div class="workout-actions">
-                    <button class="workout-action-btn">🔧 Editar</button>
-                    <button class="workout-action-btn">▶️ Iniciar</button>
-                </div>
-            </div>
-            <div class="workout-item">
-                <div class="workout-name">Circuito Personalizado</div>
-                <div class="workout-description">Secuencia de ejercicios con tiempos específicos</div>
-                <div class="workout-stats">
-                    <div class="workout-stat">⏱️ 45 min</div>
-                    <div class="workout-stat">📊 92% completado</div>
-                </div>
-                <div class="workout-actions">
-                    <button class="workout-action-btn">🔧 Editar</button>
-                    <button class="workout-action-btn">▶️ Iniciar</button>
-                </div>
-            </div>
-        </div>
-        <button class="btn btn-primary" style="width: 100%;">
-            + Nuevo Workout Personalizado
-        </button>
-    </div>
-
-    <!-- Editor de Workouts Avanzado -->
-    <div class="workout-editor" id="workoutEditor">
-        <div class="editor-header">
-            <h2 class="editor-title">Editor de Workouts</h2>
-            <button class="editor-close" id="editorClose">&times;</button>
-        </div>
-        <div class="editor-content">
-            <!-- Área de Origen: Programas disponibles -->
-            <div class="programs-list">
-                <h3>Programas Disponibles</h3>
-                <div class="programs-grid" id="editorProgramsGrid">
-                    <!-- Programas disponibles para arrastrar -->
-                </div>
-            </div>
-            
-            <!-- Área de Destino: Secuencia construida -->
-            <div class="workout-sequence">
-                <h3>Secuencia del Workout</h3>
-                <div id="workoutSequence">
-                    <!-- Secuencia de programas arrastrados -->
-                    <div class="sequence-placeholder" style="text-align: center; padding: 40px; color: var(--text-secondary);">
-                        Arrastra programas aquí para crear tu secuencia
-                    </div>
-                </div>
-            </div>
-        </div>
-        
-        <!-- Previsualización del workout completo -->
-        <div class="preview-section">
-            <h3 class="preview-title">Previsualización</h3>
-            <div class="preview-timeline" id="previewTimeline">
-                <!-- Vista previa de la secuencia -->
-            </div>
-        </div>
-        
-        <div class="editor-actions">
-            <button class="btn btn-secondary" id="cancelWorkout">Cancelar</button>
-            <button class="btn btn-primary" id="saveWorkout">Guardar Workout</button>
-        </div>
-    </div>
-
-    <!-- Creador de Programas -->
-    <div class="program-creator" id="programCreator">
-        <div class="creator-header">
-            <h2 class="creator-title">Crear Programa</h2>
-            <button class="creator-close" id="creatorClose">&times;</button>
-        </div>
-        <div class="creator-form">
-            <div class="form-group">
-                <label class="form-label">Nombre del Programa</label>
-                <input type="text" class="form-input" id="programName" placeholder="Ej: Circuito Personalizado">
-            </div>
-            <div class="form-group">
-                <label class="form-label">Ícono</label>
-                <select class="form-select" id="programIcon">
-                    <option value="💪">💪 - Fuerza</option>
-                    <option value="🏃">🏃 - Cardio</option>
-                    <option value="🧘">🧘 - Yoga</option>
-                    <option value="⚡">⚡ - Intervalos</option>
-                    <option value="🔥">🔥 - HIIT</option>
-                    <option value="⏱️">⏱️ - Temporizador</option>
-                    <option value="⚙️">⚙️ - Personalizado</option>
-                </select>
-            </div>
-            <div class="form-group">
-                <label class="form-label">Descripción</label>
-                <textarea class="form-input" id="programDescription" rows="3" placeholder="Describe tu programa..."></textarea>
-            </div>
-            <div class="form-group">
-                <label class="form-label">Tipo de Programa</label>
-                <select class="form-select" id="programType">
-                    <option value="countdown">Contador Descendente</option>
-                    <option value="countup">Contador Ascendente</option>
-                    <option value="amrap">AMRAP</option>
-                    <option value="tabata">TABATA</option>
-                    <option value="custom">Personalizado</option>
-                </select>
-            </div>
-            
-            <!-- Configuración avanzada -->
-            <div class="config-section">
-                <h4 class="config-title">Configuración Avanzada</h4>
-                <div class="form-group">
-                    <label class="form-label">Tiempo de Trabajo (segundos)</label>
-                    <input type="number" class="form-input" id="workTime" min="1" value="30">
-                </div>
-                <div class="form-group">
-                    <label class="form-label">Tiempo de Descanso (segundos)</label>
-                    <input type="number" class="form-input" id="restTime" min="1" value="15">
-                </div>
-                <div class="form-group">
-                    <label class="form-label">Número de Rondas</label>
-                    <input type="number" class="form-input" id="rounds" min="1" value="5">
-                </div>
-                <div class="form-group">
-                    <label class="form-label">Duración Total (minutos)</label>
-                    <input type="number" class="form-input" id="totalDuration" min="1" value="15">
-                </div>
-                <div class="form-group">
-                    <label class="form-label">Dirección del Contador</label>
-                    <select class="form-select" id="countDirection">
-                        <option value="up">Ascendente</option>
-                        <option value="down">Descendente</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label class="form-label">Intervalos Personalizados</label>
-                    <textarea class="form-input" id="customIntervals" rows="3" placeholder="Formato: trabajo:descanso,rondas (ej: 30:15,8)"></textarea>
-                </div>
-            </div>
-        </div>
-        <div class="creator-actions">
-            <button class="btn btn-secondary" id="cancelCreator">Cancelar</button>
-            <button class="btn btn-primary" id="saveProgram">Crear Programa</button>
-        </div>
-    </div>
+      </article>
+    </template>
 
     <script>
-        // Estado de la aplicación
-        const state = {
-            time: 0,
-            isRunning: false,
-            isPaused: false,
-            selectedProgram: null,
-            timerInterval: null,
-            programType: 'stopwatch',
-            countdownTime: 300,
-            clockInterval: null,
-            favorites: [],
-            history: [],
-            programs: [
-                {
-                    id: 'clock',
-                    icon: '⏰',
-                    title: 'Reloj',
-                    description: 'Muestra la hora actual',
-                    requiresInput: false,
-                    defaultConfig: {},
-                    color: 'var(--info)'
-                },
-                {
-                    id: 'stopwatch',
-                    icon: '⏱️',
-                    title: 'Cronómetro',
-                    description: 'Cuenta el tiempo transcurrido',
-                    requiresInput: false,
-                    defaultConfig: {},
-                    color: 'var(--success)'
-                },
-                {
-                    id: 'countup',
-                    icon: '↗️',
-                    title: 'Contador Asc',
-                    description: 'Cuenta hacia arriba',
-                    requiresInput: true,
-                    inputs: [
-                        { name: 'startTime', label: 'Tiempo Inicial (seg)', type: 'number', default: 0 }
-                    ],
-                    defaultConfig: { startTime: 0 },
-                    color: 'var(--success)'
-                },
-                {
-                    id: 'countdown',
-                    icon: '↘️',
-                    title: 'Contador Desc',
-                    description: 'Cuenta hacia atrás',
-                    requiresInput: true,
-                    inputs: [
-                        { name: 'countdownTime', label: 'Tiempo (min)', type: 'number', default: 5 }
-                    ],
-                    defaultConfig: { countdownTime: 5 },
-                    color: 'var(--danger)'
-                },
-                {
-                    id: 'amrap',
-                    icon: '💪',
-                    title: 'AMRAP',
-                    description: 'Rondas en tiempo',
-                    requiresInput: true,
-                    inputs: [
-                        { name: 'duration', label: 'Duración (min)', type: 'number', default: 15 }
-                    ],
-                    defaultConfig: { duration: 15 },
-                    color: 'var(--purple)'
-                },
-                {
-                    id: 'tabata',
-                    icon: '⚡',
-                    title: 'TABATA',
-                    description: 'Intervalos 20/10',
-                    requiresInput: true,
-                    inputs: [
-                        { name: 'rounds', label: 'Número de Rondas', type: 'number', default: 8 }
-                    ],
-                    defaultConfig: { rounds: 8 },
-                    color: 'var(--orange)'
-                },
-                {
-                    id: 'emom',
-                    icon: '🔁',
-                    title: 'EMOM',
-                    description: 'Cada minuto',
-                    requiresInput: true,
-                    inputs: [
-                        { name: 'minutes', label: 'Duración (min)', type: 'number', default: 10 },
-                        { name: 'exercise', label: 'Ejercicio', type: 'text', default: 'Sentadillas' }
-                    ],
-                    defaultConfig: { minutes: 10, exercise: 'Sentadillas' },
-                    color: 'var(--cyan)'
-                },
-                {
-                    id: 'hiit',
-                    icon: '🔥',
-                    title: 'HIIT',
-                    description: 'Alto intensidad',
-                    requiresInput: true,
-                    inputs: [
-                        { name: 'work', label: 'Trabajo (seg)', type: 'number', default: 30 },
-                        { name: 'rest', label: 'Descanso (seg)', type: 'number', default: 15 },
-                        { name: 'rounds', label: 'Rondas', type: 'number', default: 10 }
-                    ],
-                    defaultConfig: { work: 30, rest: 15, rounds: 10 },
-                    color: 'var(--danger)'
-                },
-                {
-                    id: 'fortime',
-                    icon: '⏱️',
-                    title: 'For Time',
-                    description: 'Completa rápido',
-                    requiresInput: true,
-                    inputs: [
-                        { name: 'exercises', label: 'Ejercicios', type: 'text', default: '20 Sentadillas, 15 Flexiones' }
-                    ],
-                    defaultConfig: { exercises: '20 Sentadillas, 15 Flexiones' },
-                    color: 'var(--info)'
-                },
-                {
-                    id: 'custom',
-                    icon: '⚙️',
-                    title: 'Personalizado',
-                    description: 'Intervalo configurable',
-                    requiresInput: true,
-                    inputs: [
-                        { name: 'work', label: 'Trabajo (seg)', type: 'number', default: 45 },
-                        { name: 'rest', label: 'Descanso (seg)', type: 'number', default: 15 },
-                        { name: 'rounds', label: 'Rondas', type: 'number', default: 5 }
-                    ],
-                    defaultConfig: { work: 45, rest: 15, rounds: 5 },
-                    color: 'var(--teal)'
+        // Configuración
+        const digitMap = [
+            ['a', 'b', 'c', 'd', 'e', 'f'],     // 0
+            ['b', 'c'],                          // 1
+            ['a', 'b', 'g', 'e', 'd'],          // 2
+            ['a', 'b', 'g', 'c', 'd'],          // 3
+            ['f', 'g', 'b', 'c'],               // 4
+            ['a', 'f', 'g', 'c', 'd'],          // 5
+            ['a', 'f', 'g', 'c', 'd', 'e'],     // 6
+            ['a', 'b', 'c'],                    // 7
+            ['a', 'b', 'c', 'd', 'e', 'f', 'g'],// 8
+            ['a', 'b', 'c', 'd', 'f', 'g']      // 9
+        ];
+        
+        // Estado
+        let activeProgram = 'clock';
+        let timerValue = 0;
+        let isTimerRunning = false;
+        let timerInterval;
+        let countDirection = 'down';
+        let isConnected = false;
+        let editMode = false;
+        let stopwatchCentiseconds = 0;
+        let stopwatchInterval = null;
+        let isFullscreen = false;
+        let glowEffectEnabled = true;
+        
+        // Configuraciones de programas
+        const programConfig = {
+            'count-up': { maxTime: 300 }, // 5 min en segundos
+            'count-down': { initialTime: 300 },
+            'amrap': { duration: 300 },
+            'emom': { totalMinutes: 10, reps: 10 },
+            'hiit': { 
+                warmup: 5, // min
+                work: 20, // seg
+                rest: 10, // seg
+                rounds: 8,
+                cooldown: 5, // min
+                direction: 'down'
+            },
+            'tabata': { rounds: 8, work: 20, rest: 10 },
+            'for-time': { maxTime: 600 } // 10 min
+        };
+        
+        // Programas personalizados
+        let customPrograms = [];
+        
+        // Elementos
+        const display = document.getElementById('display');
+        const actionBtn = document.getElementById('action-btn');
+        const programBtns = document.querySelectorAll('.program-btn');
+        const globalConfigBtn = document.getElementById('global-config-btn');
+        const editCorner = document.getElementById('edit-corner');
+        const configModal = document.getElementById('config-modal');
+        const createProgramModal = document.getElementById('create-program-modal');
+        const themeSwitcher = document.getElementById('themeSwitcher');
+        const customProgramBtn = document.querySelector('.program-btn.custom');
+        const fullscreenBtn = document.getElementById('fullscreen-btn');
+        const concentrationMode = document.getElementById('concentration-mode');
+        const concentrationDisplay = document.getElementById('concentration-display');
+        const concentrationActionBtn = document.getElementById('concentration-action-btn');
+        const minimizeBtn = document.getElementById('minimize-btn');
+        const programsContainer = document.getElementById('programs-container');
+        const glowEffectToggle = document.getElementById('glow-effect-toggle');
+        const ledIntensity = document.getElementById('led-intensity');
+
+        // Modales de configuración
+        const countUpModal = document.getElementById('config-count-up-modal');
+        const countDownModal = document.getElementById('config-count-down-modal');
+        const amrapModal = document.getElementById('config-amrap-modal');
+        const emomModal = document.getElementById('config-emom-modal');
+        const hiitModal = document.getElementById('config-hiit-modal');
+        const tabataModal = document.getElementById('config-tabata-modal');
+
+        // Inicializar display con dígitos
+        function initDisplay() {
+            display.innerHTML = '';
+            
+            // Crear contenedor para los dígitos
+            const digitContainer = document.createElement('div');
+            digitContainer.className = 'digit-container flex';
+            
+            // Crear dígitos y dos puntos en formato HH:MM:SS
+            for (let i = 0; i < 8; i++) {
+                if (i === 2 || i === 5) {
+                    // Crear dos puntos
+                    const colon = document.createElement('div');
+                    colon.className = 'colon';
+                    colon.innerHTML = '<div class="colon-dot"></div><div class="colon-dot"></div>';
+                    digitContainer.appendChild(colon);
+                } else {
+                    // Crear dígito
+                    digitContainer.appendChild(createDigit());
                 }
-            ],
-            dragSource: null,
-            dragTarget: null,
-            customWorkouts: [],
-            currentWorkout: null,
-            startTime: 0,
-            customPrograms: [],
-            heatmapData: {}
-        };
-
-        // Elementos del DOM
-        const elements = {
-            sidebarToggle: document.getElementById('sidebarToggle'),
-            sidebar: document.getElementById('sidebar'),
-            mainContent: document.getElementById('mainContent'),
-            currentTime: document.getElementById('currentTime'),
-            connectionStatus: document.getElementById('connectionStatus'),
-            timerDisplay: document.getElementById('timerDisplay'),
-            progressBar: document.getElementById('progressBar'),
-            playButton: document.getElementById('playButton'),
-            pauseButton: document.getElementById('pauseButton'),
-            resetButton: document.getElementById('resetButton'),
-            programInfo: document.getElementById('programInfo'),
-            programDetails: document.getElementById('programDetails'),
-            programsGrid: document.getElementById('programsGrid'),
-            darkModeBtn: document.getElementById('darkModeBtn'),
-            darkModeText: document.getElementById('darkModeText'),
-            dashboardBtn: document.getElementById('dashboardBtn'),
-            workoutsBtn: document.getElementById('workoutsBtn'),
-            statsBtn: document.getElementById('statsBtn'),
-            createProgramBtn: document.getElementById('createProgramBtn'),
-            settingsBtn: document.getElementById('settingsBtn'),
-            programModal: document.getElementById('programModal'),
-            modalTitle: document.getElementById('modalTitle'),
-            modalBody: document.getElementById('modalBody'),
-            modalClose: document.getElementById('modalClose'),
-            settingsPanel: document.getElementById('settingsPanel'),
-            settingsClose: document.getElementById('settingsClose'),
-            statsPanel: document.getElementById('statsPanel'),
-            statsClose: document.getElementById('statsClose'),
-            timeline: document.getElementById('timeline'),
-            totalSessions: document.getElementById('totalSessions'),
-            totalTime: document.getElementById('totalTime'),
-            favoriteProgram: document.getElementById('favoriteProgram'),
-            thisWeek: document.getElementById('thisWeek'),
-            workoutsPanel: document.getElementById('workoutsPanel'),
-            workoutsClose: document.getElementById('workoutsClose'),
-            createWorkoutBtn: document.getElementById('createWorkoutBtn'),
-            favoritesBtn: document.getElementById('favoritesBtn'),
-            refreshBtn: document.getElementById('refreshBtn'),
-            soundStart: document.getElementById('soundStart'),
-            soundEnd: document.getElementById('soundEnd'),
-            soundAlert: document.getElementById('soundAlert'),
-            animations: document.getElementById('animations'),
-            fullscreen: document.getElementById('fullscreen'),
-            saveHistory: document.getElementById('saveHistory'),
-            clearHistoryBtn: document.getElementById('clearHistoryBtn'),
-            workoutEditor: document.getElementById('workoutEditor'),
-            editorClose: document.getElementById('editorClose'),
-            editorProgramsGrid: document.getElementById('editorProgramsGrid'),
-            workoutSequence: document.getElementById('workoutSequence'),
-            previewTimeline: document.getElementById('previewTimeline'),
-            cancelWorkout: document.getElementById('cancelWorkout'),
-            saveWorkout: document.getElementById('saveWorkout'),
-            programCreator: document.getElementById('programCreator'),
-            creatorClose: document.getElementById('creatorClose'),
-            programName: document.getElementById('programName'),
-            programIcon: document.getElementById('programIcon'),
-            programDescription: document.getElementById('programDescription'),
-            programType: document.getElementById('programType'),
-            workTime: document.getElementById('workTime'),
-            restTime: document.getElementById('restTime'),
-            rounds: document.getElementById('rounds'),
-            totalDuration: document.getElementById('totalDuration'),
-            countDirection: document.getElementById('countDirection'),
-            customIntervals: document.getElementById('customIntervals'),
-            cancelCreator: document.getElementById('cancelCreator'),
-            saveProgram: document.getElementById('saveProgram'),
-            primaryColor: document.getElementById('primaryColor'),
-            secondaryColor: document.getElementById('secondaryColor'),
-            accentColor: document.getElementById('accentColor'),
-            applyTheme: document.getElementById('applyTheme'),
-            primaryPreview: document.getElementById('primaryPreview'),
-            secondaryPreview: document.getElementById('secondaryPreview'),
-            accentPreview: document.getElementById('accentPreview'),
-            heatmapGrid: document.getElementById('heatmapGrid')
-        };
-
-        // Sonidos (usando Web Audio API para evitar archivos externos)
-        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-
-        function playSound(frequency, duration, type = 'sine') {
-            if (!elements.soundStart.checked && type === 'start') return;
-            if (!elements.soundEnd.checked && type === 'end') return;
-            if (!elements.soundAlert.checked && type === 'alert') return;
-
-            const oscillator = audioContext.createOscillator();
-            const gainNode = audioContext.createGain();
+            }
             
-            oscillator.connect(gainNode);
-            gainNode.connect(audioContext.destination);
+            display.appendChild(digitContainer);
             
-            oscillator.type = type;
-            oscillator.frequency.value = frequency;
-            gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
-            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + duration);
-            
-            oscillator.start(audioContext.currentTime);
-            oscillator.stop(audioContext.currentTime + duration);
+            // Clonar display para modo concentración
+            concentrationDisplay.innerHTML = '';
+            concentrationDisplay.appendChild(digitContainer.cloneNode(true));
         }
-
-        // Actualizar hora del sistema
-        function updateCurrentTime() {
-            const now = new Date();
-            const timeString = now.toLocaleTimeString('es-ES', {
-                hour: '2-digit',
-                minute: '2-digit',
-                second: '2-digit'
+        
+        function createDigit() {
+            const digit = document.createElement('div');
+            digit.className = 'digit relative';
+            digit.style.width = '60px';
+            digit.style.height = '100px';
+            digit.style.margin = '0 3px';
+            digit.style.flexShrink = '0';
+            
+            ['a', 'b', 'c', 'd', 'e', 'f', 'g'].forEach(seg => {
+                const segment = document.createElement('div');
+                segment.className = `segment segment-${seg}`;
+                digit.appendChild(segment);
             });
-            const dateString = now.toLocaleDateString('es-ES');
-            elements.currentTime.textContent = `${dateString} ${timeString}`;
+            
+            return digit;
         }
-
-        // Formatear tiempo para mostrar
-        function formatTime(seconds) {
-            if (state.programType === 'clock') {
+        
+        function updateDigit(digit, num) {
+            const segments = digit.querySelectorAll('.segment');
+            segments.forEach(s => s.classList.remove('on'));
+            
+            if (num === ' ') return;
+            
+            digitMap[num].forEach(s => {
+                digit.querySelector(`.segment-${s}`).classList.add('on');
+            });
+        }
+        
+        function updateDisplay(timeStr) {
+            const digits = display.querySelectorAll('.digit');
+            const timeChars = timeStr.replace(/:/g, '').split('');
+            
+            for (let i = 0; i < digits.length; i++) {
+                if (timeChars[i] === ' ') {
+                    updateDigit(digits[i], ' ');
+                } else {
+                    updateDigit(digits[i], parseInt(timeChars[i]));
+                }
+            }
+            
+            // Actualizar también el display del modo concentración
+            if (isFullscreen) {
+                const concentrationDigits = concentrationDisplay.querySelectorAll('.digit');
+                for (let i = 0; i < concentrationDigits.length; i++) {
+                    if (timeChars[i] === ' ') {
+                        updateDigit(concentrationDigits[i], ' ');
+                    } else {
+                        updateDigit(concentrationDigits[i], parseInt(timeChars[i]));
+                    }
+                }
+                
+                // Parpadeo de los dos puntos
+                const colons = concentrationDisplay.querySelectorAll('.colon-dot');
                 const now = new Date();
-                return now.toLocaleTimeString('es-ES', {
-                    hour: '2-digit',
-                    minute: '2-digit',
-                    second: '2-digit'
-                });
+                const visible = activeProgram === 'clock' ? 
+                    (now.getSeconds() % 2 === 0) : 
+                    (isTimerRunning && timerValue % 2 === 0);
+                
+                colons.forEach(dot => dot.style.opacity = visible ? '0.8' : '0.3');
             }
             
-            const mins = Math.floor(Math.abs(seconds) / 60);
-            const secs = Math.abs(seconds) % 60;
-            const sign = seconds < 0 ? '-' : '';
+            // Parpadeo de los dos puntos
+            const colons = display.querySelectorAll('.colon-dot');
+            const now = new Date();
+            const visible = activeProgram === 'clock' ? 
+                (now.getSeconds() % 2 === 0) : 
+                (isTimerRunning && timerValue % 2 === 0);
             
-            return `${sign}${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+            colons.forEach(dot => dot.style.opacity = visible ? '0.8' : '0.3');
         }
-
-        // Actualizar display del temporizador con colores según el modo
+        
+        function updateClock() {
+            if (activeProgram === 'clock') {
+                const now = new Date();
+                const hours = String(now.getHours()).padStart(2, '0');
+                const minutes = String(now.getMinutes()).padStart(2, '0');
+                const seconds = String(now.getSeconds()).padStart(2, '0');
+                updateDisplay(`${hours}:${minutes}:${seconds}`);
+            }
+        }
+        
+        function updateStopwatch() {
+            const minutes = Math.floor(stopwatchCentiseconds / 6000);
+            const remaining = stopwatchCentiseconds % 6000;
+            const seconds = Math.floor(remaining / 100);
+            const cents = remaining % 100;
+            
+            const mins = String(minutes).padStart(2, '0');
+            const secs = String(seconds).padStart(2, '0');
+            const centsStr = String(cents).padStart(2, '0');
+            
+            updateDisplay(`  ${mins}:${secs}:${centsStr}`);
+        }
+        
         function updateTimerDisplay() {
-            elements.timerDisplay.textContent = formatTime(state.time);
+            if (activeProgram === 'clock') return;
             
-            // Cambiar color según el tipo de programa
-            elements.timerDisplay.className = 'timer-display';
-            elements.timerDisplay.classList.add(state.programType);
-        }
-
-        // Actualizar barra de progreso
-        function updateProgressBar() {
-            let progress = 0;
-            
-            if (state.programType === 'countdown' && state.countdownTime > 0) {
-                progress = ((state.countdownTime - state.time) / state.countdownTime) * 100;
-            } else if (state.selectedProgram && state.selectedProgram.id === 'amrap') {
-                // Para AMRAP, mostrar progreso basado en el tiempo transcurrido
-                progress = Math.min((state.time / 900) * 100, 100); // 15 minutos máximo
-            } else if (state.time > 0) {
-                // Para otros programas, mostrar progreso creciente
-                progress = Math.min((state.time / 3600) * 100, 100); // 1 hora máximo
+            let timeStr;
+            if (activeProgram === 'stopwatch') {
+                updateStopwatch();
+                return;
+            } else if (countDirection === 'down') {
+                const mins = Math.floor(timerValue / 60);
+                const secs = timerValue % 60;
+                timeStr = `  ${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}:00`;
+            } else {
+                // Contador ascendente
+                const mins = Math.floor(timerValue / 60);
+                const secs = timerValue % 60;
+                timeStr = `  ${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}:00`;
             }
             
-            elements.progressBar.style.width = `${progress}%`;
+            updateDisplay(timeStr);
         }
-
-        // Iniciar temporizador
+        
         function startTimer() {
-            if (state.timerInterval) return;
+            if (isTimerRunning) return;
             
-            state.isRunning = true;
-            state.isPaused = false;
-            state.startTime = Date.now();
+            isTimerRunning = true;
+            actionBtn.textContent = 'Pausar';
+            concentrationActionBtn.innerHTML = '<i class="fas fa-pause"></i>';
             
-            playSound(880, 0.2, 'sine'); // Sonido de inicio
+            // Deshabilitar otros programas mientras el timer está activo
+            document.querySelectorAll('.program-btn').forEach(btn => {
+                if (btn.dataset.program !== activeProgram) {
+                    btn.style.pointerEvents = 'none';
+                    btn.style.opacity = '0.6';
+                } else {
+                    btn.classList.add('running');
+                }
+            });
             
-            if (state.programType === 'clock') {
-                state.clockInterval = setInterval(() => {
+            if (activeProgram === 'stopwatch') {
+                // Usar centésimos para el cronómetro
+                stopwatchCentiseconds = 0;
+                stopwatchInterval = setInterval(() => {
+                    stopwatchCentiseconds++;
+                    updateStopwatch();
+                }, 10);
+            } else {
+                timerInterval = setInterval(() => {
+                    if (countDirection === 'down') {
+                        if (timerValue <= 0) {
+                            clearInterval(timerInterval);
+                            isTimerRunning = false;
+                            actionBtn.textContent = 'Iniciar';
+                            concentrationActionBtn.innerHTML = '<i class="fas fa-play"></i>';
+                            return;
+                        }
+                        timerValue--;
+                    } else {
+                        timerValue++;
+                    }
+                    
                     updateTimerDisplay();
                 }, 1000);
-                return;
             }
-            
-            state.timerInterval = setInterval(() => {
-                if (state.programType === 'countdown') {
-                    state.time--;
-                    if (state.time <= 0) {
-                        state.time = 0;
-                        pauseTimer();
-                        playSound(220, 1, 'sawtooth'); // Sonido de finalización
-                    }
-                } else {
-                    state.time++;
-                }
-                updateTimerDisplay();
-                updateProgressBar();
-            }, 1000);
         }
-
-        // Pausar temporizador
+        
         function pauseTimer() {
-            if (state.clockInterval) {
-                clearInterval(state.clockInterval);
-                state.clockInterval = null;
-            }
-            
-            if (state.timerInterval) {
-                clearInterval(state.timerInterval);
-                state.timerInterval = null;
-            }
-            
-            state.isRunning = false;
-            state.isPaused = true;
-            
-            if (state.time > 0 && elements.saveHistory.checked) {
-                // Guardar en historial
-                const historyItem = {
-                    id: Date.now(),
-                    program: state.selectedProgram,
-                    time: state.time,
-                    date: new Date().toISOString()
-                };
-                state.history.push(historyItem);
-                localStorage.setItem('timerHistory', JSON.stringify(state.history));
-                updateStatsPanel();
-                updateHeatmap();
-            }
-        }
-
-        // Resetear temporizador
-        function resetTimer() {
-            pauseTimer();
-            state.time = 0;
-            state.isRunning = false;
-            state.isPaused = false;
-            
-            if (state.programType === 'countdown') {
-                state.time = state.countdownTime || 300;
-            }
-            
-            updateTimerDisplay();
-            updateProgressBar();
-        }
-
-        // Manejar selección de programa
-        function handleProgramSelect(card) {
-            // Remover clase seleccionada de todos
-            document.querySelectorAll('.program-card').forEach(c => {
-                c.classList.remove('selected');
-            });
-            
-            // Agregar clase seleccionada al actual
-            card.classList.add('selected');
-            
-            // Actualizar estado
-            const programId = card.dataset.program;
-            const program = state.programs.find(p => p.id === programId);
-            state.programType = programId;
-            state.selectedProgram = program;
-            
-            // Verificar si el programa requiere configuración
-            if (program.requiresInput) {
-                showProgramModal(program);
+            if (activeProgram === 'stopwatch') {
+                clearInterval(stopwatchInterval);
             } else {
-                applyProgramConfig(program, program.defaultConfig);
+                clearInterval(timerInterval);
             }
-        }
-
-        // Mostrar modal de configuración de programa
-        function showProgramModal(program) {
-            elements.modalTitle.textContent = `Configurar ${program.title}`;
             
-            let formHTML = '<form id="programConfigForm">';
+            isTimerRunning = false;
+            actionBtn.textContent = 'Iniciar';
+            concentrationActionBtn.innerHTML = '<i class="fas fa-play"></i>';
             
-            program.inputs.forEach(input => {
-                formHTML += `
-                    <div class="form-group">
-                        <label class="form-label">${input.label}</label>
-                        <input type="${input.type}" class="form-input" id="${input.name}" 
-                               value="${input.default}" ${input.type === 'number' ? 'min="0"' : ''}>
-                    </div>
-                `;
-            });
-            
-            formHTML += `
-                <div class="form-buttons">
-                    <button type="button" class="btn btn-secondary" id="modalCancel">Cancelar</button>
-                    <button type="submit" class="btn btn-primary">Aplicar</button>
-                </div>
-            `;
-            
-            formHTML += '</form>';
-            
-            elements.modalBody.innerHTML = formHTML;
-            elements.programModal.classList.add('active');
-            
-            // Event listeners para el formulario
-            document.getElementById('programConfigForm').addEventListener('submit', (e) => {
-                e.preventDefault();
-                const config = {};
-                program.inputs.forEach(input => {
-                    const value = document.getElementById(input.name).value;
-                    config[input.name] = input.type === 'number' ? parseInt(value) : value;
-                });
-                applyProgramConfig(program, config);
-                elements.programModal.classList.remove('active');
-            });
-            
-            document.getElementById('modalCancel').addEventListener('click', () => {
-                elements.programModal.classList.remove('active');
+            // Habilitar todos los programas
+            document.querySelectorAll('.program-btn').forEach(btn => {
+                btn.style.pointerEvents = 'auto';
+                btn.style.opacity = '1';
+                btn.classList.remove('running');
             });
         }
-
-        // Aplicar configuración de programa
-        function applyProgramConfig(program, config) {
-            // Actualizar configuración según el tipo de programa
-            if (program.id === 'countdown') {
-                state.countdownTime = (config.countdownTime || 5) * 60;
-                state.time = state.countdownTime;
-            } else if (program.id === 'countup') {
-                state.time = config.startTime || 0;
-            } else {
-                state.time = 0;
-            }
-            
-            state.selectedProgram = program;
-            state.programType = program.id;
-            
-            // Actualizar información del programa
-            elements.programInfo.textContent = program.title;
-            
-            let detailsText = '';
-            if (program.id === 'countdown') {
-                detailsText = `Tiempo: ${config.countdownTime || 5} minutos`;
-            } else if (program.id === 'amrap') {
-                detailsText = `Duración: ${config.duration || 15} minutos`;
-            } else if (program.id === 'tabata') {
-                detailsText = `Rondas: ${config.rounds || 8}`;
-            } else if (program.id === 'emom') {
-                detailsText = `${config.minutes || 10} minutos - ${config.exercise || 'Ejercicio'}`;
-            } else if (program.id === 'hiit') {
-                detailsText = `${config.work || 30}/${config.rest || 15} seg - ${config.rounds || 10} rondas`;
-            } else if (program.id === 'fortime') {
-                detailsText = config.exercises || 'Workout';
-            } else if (program.id === 'custom') {
-                detailsText = `${config.work || 45}/${config.rest || 15} seg - ${config.rounds || 5} rondas`;
-            } else {
-                detailsText = program.description;
-            }
-            
-            elements.programDetails.textContent = detailsText;
-            updateTimerDisplay();
-            updateProgressBar();
-            resetTimer();
-        }
-
-        // Toggle modo oscuro
-        function toggleDarkMode() {
-            document.body.classList.toggle('dark-mode');
-            
-            // Cambiar texto
-            if (document.body.classList.contains('dark-mode')) {
-                elements.darkModeText.textContent = 'Modo Claro';
-            } else {
-                elements.darkModeText.textContent = 'Modo Oscuro';
-            }
-        }
-
-        // Manejar estado de conexión
-        function updateConnectionStatus() {
-            if (navigator.onLine) {
-                elements.connectionStatus.className = 'connection-status online';
-                elements.connectionStatus.innerHTML = '<span>📶 Online</span>';
-            } else {
-                elements.connectionStatus.className = 'connection-status offline';
-                elements.connectionStatus.innerHTML = '<span>🚫 Offline</span>';
-            }
-        }
-
-        // Funciones para botones de la sidebar
-        function toggleSidebar() {
-            elements.sidebar.classList.toggle('active');
-            elements.mainContent.classList.toggle('sidebar-open');
-        }
-
-        function showDashboard() {
-            // Ya estamos en el dashboard
-            document.querySelectorAll('.sidebar-item').forEach(item => {
-                item.classList.remove('active');
-            });
-            elements.dashboardBtn.classList.add('active');
-            
-            // Cerrar paneles si están abiertos
-            elements.settingsPanel.classList.remove('active');
-            elements.statsPanel.classList.remove('active');
-            elements.workoutsPanel.classList.remove('active');
-            elements.workoutEditor.classList.remove('active');
-            elements.programCreator.classList.remove('active');
-            elements.sidebar.classList.remove('active');
-            elements.mainContent.classList.remove('sidebar-open');
-        }
-
-        function showWorkouts() {
-            document.querySelectorAll('.sidebar-item').forEach(item => {
-                item.classList.remove('active');
-            });
-            elements.workoutsBtn.classList.add('active');
-            
-            elements.workoutsPanel.classList.add('active');
-            elements.settingsPanel.classList.remove('active');
-            elements.statsPanel.classList.remove('active');
-            elements.workoutEditor.classList.remove('active');
-            elements.programCreator.classList.remove('active');
-            elements.sidebar.classList.remove('active');
-            elements.mainContent.classList.remove('sidebar-open');
-        }
-
-        function showStats() {
-            document.querySelectorAll('.sidebar-item').forEach(item => {
-                item.classList.remove('active');
-            });
-            elements.statsBtn.classList.add('active');
-            
-            elements.statsPanel.classList.add('active');
-            elements.settingsPanel.classList.remove('active');
-            elements.workoutsPanel.classList.remove('active');
-            elements.workoutEditor.classList.remove('active');
-            elements.programCreator.classList.remove('active');
-            elements.sidebar.classList.remove('active');
-            elements.mainContent.classList.remove('sidebar-open');
-            
-            updateStatsPanel();
-        }
-
-        function showCreateProgram() {
-            document.querySelectorAll('.sidebar-item').forEach(item => {
-                item.classList.remove('active');
-            });
-            elements.createProgramBtn.classList.add('active');
-            
-            elements.programCreator.classList.add('active');
-            elements.settingsPanel.classList.remove('active');
-            elements.statsPanel.classList.remove('active');
-            elements.workoutsPanel.classList.remove('active');
-            elements.workoutEditor.classList.remove('active');
-            elements.sidebar.classList.remove('active');
-            elements.mainContent.classList.remove('sidebar-open');
-        }
-
-        function showSettings() {
-            document.querySelectorAll('.sidebar-item').forEach(item => {
-                item.classList.remove('active');
-            });
-            elements.settingsBtn.classList.add('active');
-            
-            elements.settingsPanel.classList.add('active');
-            elements.statsPanel.classList.remove('active');
-            elements.workoutsPanel.classList.remove('active');
-            elements.workoutEditor.classList.remove('active');
-            elements.programCreator.classList.remove('active');
-            elements.sidebar.classList.remove('active');
-            elements.mainContent.classList.remove('sidebar-open');
-        }
-
-        // Mostrar editor de workouts
-        function showWorkoutEditor() {
-            elements.workoutEditor.classList.add('active');
-            elements.workoutsPanel.classList.remove('active');
-            renderEditorPrograms();
-            renderWorkoutSequence();
-            updatePreview();
-        }
-
-        // Renderizar programas en el editor
-        function renderEditorPrograms() {
-            elements.editorProgramsGrid.innerHTML = '';
-            
-            state.programs.forEach(program => {
-                const card = document.createElement('div');
-                card.className = 'program-card draggable';
-                card.dataset.program = program.id;
-                card.draggable = true;
-                
-                card.innerHTML = `
-                    <div class="program-icon">${program.icon}</div>
-                    <div class="program-title">${program.title}</div>
-                    <div class="program-description">${program.description}</div>
-                `;
-                
-                // Event listeners para drag and drop
-                card.addEventListener('dragstart', (e) => {
-                    e.dataTransfer.setData('text/plain', program.id);
-                    card.classList.add('dragging');
-                });
-                
-                card.addEventListener('dragend', () => {
-                    card.classList.remove('dragging');
-                });
-                
-                elements.editorProgramsGrid.appendChild(card);
-            });
-        }
-
-        // Renderizar secuencia del workout
-        function renderWorkoutSequence() {
-            if (!state.currentWorkout || state.currentWorkout.sequence.length === 0) {
-                elements.workoutSequence.innerHTML = `
-                    <div class="sequence-placeholder" style="text-align: center; padding: 40px; color: var(--text-secondary);">
-                        Arrastra programas aquí para crear tu secuencia
-                    </div>
-                `;
-                return;
-            }
-            
-            elements.workoutSequence.innerHTML = '';
-            
-            state.currentWorkout.sequence.forEach((programId, index) => {
-                const program = state.programs.find(p => p.id === programId);
-                if (program) {
-                    const sequenceItem = document.createElement('div');
-                    sequenceItem.className = 'sequence-item draggable';
-                    sequenceItem.dataset.index = index;
-                    sequenceItem.draggable = true;
-                    
-                    sequenceItem.innerHTML = `
-                        <div>
-                            <div class="program-icon" style="font-size: 24px; margin-bottom: 8px;">${program.icon}</div>
-                            <div class="program-title">${program.title}</div>
-                            <div class="program-description">${program.description}</div>
-                        </div>
-                        <div class="sequence-controls">
-                            <button class="sequence-btn" onclick="removeFromSequence(${index})">🗑️</button>
-                            <button class="sequence-btn" onclick="moveUp(${index})">⬆️</button>
-                            <button class="sequence-btn" onclick="moveDown(${index})">⬇️</button>
-                        </div>
-                    `;
-                    
-                    // Event listeners para reordenar
-                    sequenceItem.addEventListener('dragstart', (e) => {
-                        e.dataTransfer.setData('text/plain', index);
-                        sequenceItem.classList.add('dragging');
-                    });
-                    
-                    sequenceItem.addEventListener('dragend', () => {
-                        sequenceItem.classList.remove('dragging');
-                    });
-                    
-                    elements.workoutSequence.appendChild(sequenceItem);
-                }
-            });
-        }
-
-        // Actualizar previsualización
-        function updatePreview() {
-            if (!state.currentWorkout || state.currentWorkout.sequence.length === 0) {
-                elements.previewTimeline.innerHTML = '<div style="color: var(--text-secondary); text-align: center; width: 100%;">Agrega programas para ver la previsualización</div>';
-                return;
-            }
-            
-            elements.previewTimeline.innerHTML = '';
-            
-            state.currentWorkout.sequence.forEach(programId => {
-                const program = state.programs.find(p => p.id === programId);
-                if (program) {
-                    const previewItem = document.createElement('div');
-                    previewItem.className = 'preview-item';
-                    previewItem.innerHTML = `
-                        <div class="preview-icon">${program.icon}</div>
-                        <div class="preview-name">${program.title}</div>
-                        <div class="preview-time">~2 min</div>
-                    `;
-                    elements.previewTimeline.appendChild(previewItem);
-                }
-            });
-        }
-
-        // Funciones para manipular la secuencia
-        function removeFromSequence(index) {
-            if (state.currentWorkout && state.currentWorkout.sequence) {
-                state.currentWorkout.sequence.splice(index, 1);
-                renderWorkoutSequence();
-                updatePreview();
-            }
-        }
-
-        function moveUp(index) {
-            if (index > 0 && state.currentWorkout && state.currentWorkout.sequence) {
-                const temp = state.currentWorkout.sequence[index];
-                state.currentWorkout.sequence[index] = state.currentWorkout.sequence[index - 1];
-                state.currentWorkout.sequence[index - 1] = temp;
-                renderWorkoutSequence();
-                updatePreview();
-            }
-        }
-
-        function moveDown(index) {
-            if (state.currentWorkout && state.currentWorkout.sequence && 
-                index < state.currentWorkout.sequence.length - 1) {
-                const temp = state.currentWorkout.sequence[index];
-                state.currentWorkout.sequence[index] = state.currentWorkout.sequence[index + 1];
-                state.currentWorkout.sequence[index + 1] = temp;
-                renderWorkoutSequence();
-                updatePreview();
-            }
-        }
-
-        // Actualizar panel de estadísticas con timeline visual
-        function updateStatsPanel() {
-            // Actualizar resumen
-            elements.totalSessions.textContent = state.history.length;
-            
-            const totalTimeSeconds = state.history.reduce((sum, item) => sum + item.time, 0);
-            elements.totalTime.textContent = (totalTimeSeconds / 3600).toFixed(1);
-            
-            // Encontrar programa favorito
-            if (state.history.length > 0) {
-                const programCount = {};
-                state.history.forEach(item => {
-                    const programId = item.program.id;
-                    programCount[programId] = (programCount[programId] || 0) + 1;
-                });
-                
-                const favoriteProgramId = Object.keys(programCount).reduce((a, b) => 
-                    programCount[a] > programCount[b] ? a : b);
-                
-                const favoriteProgram = state.programs.find(p => p.id === favoriteProgramId);
-                elements.favoriteProgram.textContent = favoriteProgram ? favoriteProgram.title : '-';
-            }
-            
-            // Sesiones esta semana
-            const oneWeekAgo = Date.now() - (7 * 24 * 60 * 60 * 1000);
-            const thisWeekSessions = state.history.filter(item => 
-                new Date(item.date).getTime() > oneWeekAgo
-            ).length;
-            elements.thisWeek.textContent = thisWeekSessions;
-            
-            // Actualizar timeline
-            elements.timeline.innerHTML = '';
-            
-            // Mostrar las últimas 10 sesiones
-            const recentHistory = [...state.history].reverse().slice(0, 10);
-            
-            recentHistory.forEach(item => {
-                const program = state.programs.find(p => p.id === item.program.id);
-                const date = new Date(item.date);
-                const formattedDate = date.toLocaleDateString('es-ES');
-                const formattedTime = date.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
-                
-                const timelineItem = document.createElement('div');
-                timelineItem.className = 'timeline-item';
-                timelineItem.innerHTML = `
-                    <div class="timeline-date">${formattedDate} ${formattedTime}</div>
-                    <div class="timeline-content">
-                        <div class="timeline-program">${program ? program.icon + ' ' + program.title : 'Desconocido'}</div>
-                        <div class="timeline-duration">⏱️ ${formatTime(item.time)}</div>
-                    </div>
-                `;
-                
-                elements.timeline.appendChild(timelineItem);
-            });
-        }
-
-        // Generar heatmap de actividad
-        function generateHeatmap() {
-            elements.heatmapGrid.innerHTML = '';
-            
-            // Generar datos de ejemplo para el heatmap (últimos 30 días)
-            const today = new Date();
-            const heatmapData = {};
-            
-            // Generar datos aleatorios para demostración
-            for (let i = 0; i < 30; i++) {
-                const date = new Date(today);
-                date.setDate(today.getDate() - i);
-                const dateKey = date.toISOString().split('T')[0];
-                heatmapData[dateKey] = Math.floor(Math.random() * 5); // 0-4 sesiones
-            }
-            
-            // Generar días de la semana para los últimos 4 semanas
-            const days = ['L', 'M', 'X', 'J', 'V', 'S', 'D'];
-            
-            for (let week = 0; week < 4; week++) {
-                for (let day = 0; day < 7; day++) {
-                    const date = new Date(today);
-                    date.setDate(today.getDate() - (week * 7 + (6 - day)));
-                    const dateKey = date.toISOString().split('T')[0];
-                    const level = heatmapData[dateKey] || 0;
-                    
-                    const dayElement = document.createElement('div');
-                    dayElement.className = `heatmap-day level-${level}`;
-                    dayElement.title = `${dateKey}: ${level} sesiones`;
-                    dayElement.textContent = days[day];
-                    
-                    elements.heatmapGrid.appendChild(dayElement);
-                }
-            }
-        }
-
-        // Actualizar heatmap con datos reales
-        function updateHeatmap() {
-            // Esta función se llamaría cada vez que se complete una sesión
-            // Por ahora usamos datos de ejemplo
-            generateHeatmap();
-        }
-
-        // Cargar datos del localStorage
-        function loadFromStorage() {
-            try {
-                const favorites = localStorage.getItem('timerFavorites');
-                if (favorites) {
-                    state.favorites = JSON.parse(favorites);
-                }
-                
-                const history = localStorage.getItem('timerHistory');
-                if (history) {
-                    state.history = JSON.parse(history);
-                }
-                
-                const customWorkouts = localStorage.getItem('customWorkouts');
-                if (customWorkouts) {
-                    state.customWorkouts = JSON.parse(customWorkouts);
-                }
-                
-                const customPrograms = localStorage.getItem('customPrograms');
-                if (customPrograms) {
-                    state.customPrograms = JSON.parse(customPrograms);
-                    // Agregar programas personalizados a la lista
-                    state.programs = [...state.programs, ...state.customPrograms];
-                }
-                
-                const theme = localStorage.getItem('customTheme');
-                if (theme) {
-                    const themeColors = JSON.parse(theme);
-                    document.documentElement.style.setProperty('--theme-primary', themeColors.primary);
-                    document.documentElement.style.setProperty('--theme-secondary', themeColors.secondary);
-                    document.documentElement.style.setProperty('--theme-accent', themeColors.accent);
-                }
-            } catch (e) {
-                console.log('Error cargando datos del localStorage:', e);
-            }
-        }
-
-        // Guardar favoritos
-        function saveFavorites() {
-            localStorage.setItem('timerFavorites', JSON.stringify(state.favorites));
-        }
-
-        // Guardar workouts personalizados
-        function saveCustomWorkouts() {
-            localStorage.setItem('customWorkouts', JSON.stringify(state.customWorkouts));
-        }
-
-        // Guardar programas personalizados
-        function saveCustomPrograms() {
-            localStorage.setItem('customPrograms', JSON.stringify(state.customPrograms));
-        }
-
-        // Guardar tema personalizado
-        function saveCustomTheme(primary, secondary, accent) {
-            const theme = {
-                primary: primary,
-                secondary: secondary,
-                accent: accent
-            };
-            localStorage.setItem('customTheme', JSON.stringify(theme));
-        }
-
-        // Renderizar programas
-        function renderPrograms() {
-            elements.programsGrid.innerHTML = '';
-            
-            let programsToShow = state.programs;
-            
-            // Si se está viendo solo favoritos
-            if (state.showingFavorites) {
-                programsToShow = state.programs.filter(p => state.favorites.includes(p.id));
-            }
-            
-            programsToShow.forEach(program => {
-                const card = document.createElement('div');
-                card.className = 'program-card';
-                card.dataset.program = program.id;
-                card.draggable = true;
-                
-                const isFavorite = state.favorites.includes(program.id);
-                
-                card.innerHTML = `
-                    <button class="program-favorite ${isFavorite ? 'active' : ''}" data-program="${program.id}">
-                        ${isFavorite ? '★' : '☆'}
-                    </button>
-                    <div class="program-icon">${program.icon}</div>
-                    <div class="program-title">${program.title}</div>
-                    <div class="program-description">${program.description}</div>
-                `;
-                
-                // Event listeners
-                card.addEventListener('click', () => handleProgramSelect(card));
-                
-                // Drag and drop mejorado
-                card.addEventListener('dragstart', handleDragStart);
-                card.addEventListener('dragover', handleDragOver);
-                card.addEventListener('dragenter', handleDragEnter);
-                card.addEventListener('dragleave', handleDragLeave);
-                card.addEventListener('drop', handleDrop);
-                card.addEventListener('dragend', handleDragEnd);
-                
-                // Event listener para favorito
-                const favoriteBtn = card.querySelector('.program-favorite');
-                favoriteBtn.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    toggleFavorite(program.id);
-                    favoriteBtn.classList.toggle('active');
-                    favoriteBtn.textContent = favoriteBtn.classList.contains('active') ? '★' : '☆';
-                });
-                
-                elements.programsGrid.appendChild(card);
-            });
-        }
-
-        // Toggle favorito
-        function toggleFavorite(programId) {
-            const index = state.favorites.indexOf(programId);
-            if (index > -1) {
-                state.favorites.splice(index, 1);
-            } else {
-                state.favorites.push(programId);
-            }
-            saveFavorites();
-        }
-
-        // Drag and Drop handlers - Mejorados
-        function handleDragStart(e) {
-            state.dragSource = this;
-            this.classList.add('dragging');
-            e.dataTransfer.effectAllowed = 'move';
-            e.dataTransfer.setData('text/html', this.outerHTML);
-        }
-
-        function handleDragOver(e) {
-            e.preventDefault();
-            e.dataTransfer.dropEffect = 'move';
-            
-            // Determinar posición de inserción
-            const rect = this.getBoundingClientRect();
-            const midpoint = (rect.top + rect.bottom) / 2;
-            
-            this.classList.remove('drag-over-top', 'drag-over-bottom');
-            
-            if (e.clientY < midpoint) {
-                this.classList.add('drag-over-top');
-            } else {
-                this.classList.add('drag-over-bottom');
-            }
-            
-            return false;
-        }
-
-        function handleDragEnter(e) {
-            e.preventDefault();
-            this.classList.add('drag-over');
-        }
-
-        function handleDragLeave(e) {
-            this.classList.remove('drag-over', 'drag-over-top', 'drag-over-bottom');
-        }
-
-        function handleDrop(e) {
-            e.stopPropagation();
-            e.preventDefault();
-            
-            this.classList.remove('drag-over', 'drag-over-top', 'drag-over-bottom');
-            
-            if (state.dragSource !== this) {
-                // Reordenar elementos
-                const allCards = Array.from(elements.programsGrid.children);
-                const sourceIndex = allCards.indexOf(state.dragSource);
-                const targetIndex = allCards.indexOf(this);
-                
-                if (sourceIndex < targetIndex) {
-                    elements.programsGrid.insertBefore(state.dragSource, this.nextSibling);
-                } else {
-                    elements.programsGrid.insertBefore(state.dragSource, this);
-                }
-            }
-            
-            return false;
-        }
-
-        function handleDragEnd(e) {
-            this.classList.remove('dragging');
-            document.querySelectorAll('.program-card').forEach(card => {
-                card.classList.remove('drag-over', 'drag-over-top', 'drag-over-bottom');
-            });
-            state.dragSource = null;
-        }
-
-        // Event Listeners
-        elements.playButton.addEventListener('click', () => {
-            if (state.isRunning) {
+        
+        function toggleTimer() {
+            if (isTimerRunning) {
                 pauseTimer();
-                elements.playButton.textContent = '▶️';
             } else {
                 startTimer();
-                elements.playButton.textContent = '⏸️';
-            }
-        });
-
-        elements.resetButton.addEventListener('click', resetTimer);
-
-        elements.sidebarToggle.addEventListener('click', toggleSidebar);
-        
-        elements.darkModeBtn.addEventListener('click', toggleDarkMode);
-        elements.dashboardBtn.addEventListener('click', showDashboard);
-        elements.workoutsBtn.addEventListener('click', showWorkouts);
-        elements.statsBtn.addEventListener('click', showStats);
-        elements.createProgramBtn.addEventListener('click', showCreateProgram);
-        elements.settingsBtn.addEventListener('click', showSettings);
-
-        elements.modalClose.addEventListener('click', () => {
-            elements.programModal.classList.remove('active');
-        });
-
-        elements.settingsClose.addEventListener('click', () => {
-            elements.settingsPanel.classList.remove('active');
-        });
-
-        elements.statsClose.addEventListener('click', () => {
-            elements.statsPanel.classList.remove('active');
-        });
-
-        elements.workoutsClose.addEventListener('click', () => {
-            elements.workoutsPanel.classList.remove('active');
-        });
-
-        elements.editorClose.addEventListener('click', () => {
-            elements.workoutEditor.classList.remove('active');
-        });
-
-        elements.creatorClose.addEventListener('click', () => {
-            elements.programCreator.classList.remove('active');
-        });
-
-        elements.createWorkoutBtn.addEventListener('click', () => {
-            state.currentWorkout = {
-                name: 'Nuevo Workout',
-                sequence: []
-            };
-            showWorkoutEditor();
-        });
-
-        elements.cancelWorkout.addEventListener('click', () => {
-            elements.workoutEditor.classList.remove('active');
-        });
-
-        elements.saveWorkout.addEventListener('click', () => {
-            if (state.currentWorkout && state.currentWorkout.sequence.length > 0) {
-                state.currentWorkout.id = Date.now();
-                state.customWorkouts.push(state.currentWorkout);
-                saveCustomWorkouts();
-                elements.workoutEditor.classList.remove('active');
-                alert('Workout guardado correctamente!');
-            } else {
-                alert('Por favor agrega al menos un programa a la secuencia');
-            }
-        });
-
-        elements.favoritesBtn.addEventListener('click', () => {
-            state.showingFavorites = !state.showingFavorites;
-            elements.favoritesBtn.textContent = state.showingFavorites ? '⭐' : '☆';
-            renderPrograms();
-        });
-
-        elements.refreshBtn.addEventListener('click', renderPrograms);
-
-        elements.clearHistoryBtn.addEventListener('click', () => {
-            if (confirm('¿Estás seguro de que quieres limpiar todo el historial?')) {
-                state.history = [];
-                localStorage.removeItem('timerHistory');
-                updateStatsPanel();
-            }
-        });
-
-        // Event listeners para drag and drop en el editor
-        elements.workoutSequence.addEventListener('dragover', (e) => {
-            e.preventDefault();
-            e.dataTransfer.dropEffect = 'move';
-        });
-
-        elements.workoutSequence.addEventListener('drop', (e) => {
-            e.preventDefault();
-            const programId = e.dataTransfer.getData('text/plain');
-            if (programId) {
-                if (!state.currentWorkout) {
-                    state.currentWorkout = {
-                        name: 'Nuevo Workout',
-                        sequence: []
-                    };
-                }
-                state.currentWorkout.sequence.push(programId);
-                renderWorkoutSequence();
-                updatePreview();
-            }
-        });
-
-        // Event listener para crear programa
-        elements.saveProgram.addEventListener('click', () => {
-            const name = elements.programName.value.trim();
-            const icon = elements.programIcon.value;
-            const description = elements.programDescription.value.trim();
-            const type = elements.programType.value;
-            const workTime = parseInt(elements.workTime.value) || 30;
-            const restTime = parseInt(elements.restTime.value) || 15;
-            const rounds = parseInt(elements.rounds.value) || 5;
-            const totalDuration = parseInt(elements.totalDuration.value) || 15;
-            const countDirection = elements.countDirection.value;
-            const customIntervals = elements.customIntervals.value.trim();
-            
-            if (!name) {
-                alert('Por favor ingresa un nombre para el programa');
-                return;
-            }
-            
-            const newProgram = {
-                id: 'custom_' + Date.now(),
-                icon: icon,
-                title: name,
-                description: description,
-                requiresInput: true,
-                inputs: [],
-                defaultConfig: {},
-                color: 'var(--teal)',
-                workTime: workTime,
-                restTime: restTime,
-                rounds: rounds,
-                totalDuration: totalDuration,
-                countDirection: countDirection,
-                customIntervals: customIntervals
-            };
-            
-            // Configurar inputs según el tipo de programa
-            switch(type) {
-                case 'countdown':
-                    newProgram.inputs = [
-                        { name: 'countdownTime', label: 'Tiempo (min)', type: 'number', default: totalDuration }
-                    ];
-                    newProgram.defaultConfig = { countdownTime: totalDuration };
-                    break;
-                case 'countup':
-                    newProgram.inputs = [
-                        { name: 'startTime', label: 'Tiempo Inicial (seg)', type: 'number', default: 0 }
-                    ];
-                    newProgram.defaultConfig = { startTime: 0 };
-                    break;
-                case 'amrap':
-                    newProgram.inputs = [
-                        { name: 'duration', label: 'Duración (min)', type: 'number', default: totalDuration }
-                    ];
-                    newProgram.defaultConfig = { duration: totalDuration };
-                    break;
-                case 'tabata':
-                    newProgram.inputs = [
-                        { name: 'rounds', label: 'Número de Rondas', type: 'number', default: rounds }
-                    ];
-                    newProgram.defaultConfig = { rounds: rounds };
-                    break;
-                case 'custom':
-                    newProgram.inputs = [
-                        { name: 'work', label: 'Trabajo (seg)', type: 'number', default: workTime },
-                        { name: 'rest', label: 'Descanso (seg)', type: 'number', default: restTime },
-                        { name: 'rounds', label: 'Rondas', type: 'number', default: rounds }
-                    ];
-                    newProgram.defaultConfig = { work: workTime, rest: restTime, rounds: rounds };
-                    break;
-            }
-            
-            state.customPrograms.push(newProgram);
-            state.programs.push(newProgram);
-            saveCustomPrograms();
-            renderPrograms();
-            elements.programCreator.classList.remove('active');
-            alert('Programa creado correctamente!');
-            
-            // Limpiar formulario
-            elements.programName.value = '';
-            elements.programDescription.value = '';
-            elements.programIcon.value = '💪';
-            elements.programType.value = 'countdown';
-            elements.workTime.value = '30';
-            elements.restTime.value = '15';
-            elements.rounds.value = '5';
-            elements.totalDuration.value = '15';
-            elements.countDirection.value = 'up';
-            elements.customIntervals.value = '';
-        });
-
-        elements.cancelCreator.addEventListener('click', () => {
-            elements.programCreator.classList.remove('active');
-        });
-
-        // Event listener para el reloj - iniciar automáticamente
-        elements.currentTime.addEventListener('click', () => {
-            // Encontrar el programa de reloj
-            const clockProgram = state.programs.find(p => p.id === 'clock');
-            if (clockProgram) {
-                // Seleccionar el programa de reloj
-                const clockCard = document.querySelector(`.program-card[data-program="clock"]`);
-                if (clockCard) {
-                    handleProgramSelect(clockCard);
-                    // Iniciar automáticamente
-                    if (!state.isRunning) {
-                        startTimer();
-                        elements.playButton.textContent = '⏸️';
-                    }
-                }
-            }
-        });
-
-        // Event listeners para temas personalizados
-        elements.primaryColor.addEventListener('input', (e) => {
-            elements.primaryPreview.style.backgroundColor = e.target.value;
-        });
-
-        elements.secondaryColor.addEventListener('input', (e) => {
-            elements.secondaryPreview.style.backgroundColor = e.target.value;
-        });
-
-        elements.accentColor.addEventListener('input', (e) => {
-            elements.accentPreview.style.backgroundColor = e.target.value;
-        });
-
-        elements.applyTheme.addEventListener('click', () => {
-            const primary = elements.primaryColor.value;
-            const secondary = elements.secondaryColor.value;
-            const accent = elements.accentColor.value;
-            
-            document.documentElement.style.setProperty('--theme-primary', primary);
-            document.documentElement.style.setProperty('--theme-secondary', secondary);
-            document.documentElement.style.setProperty('--theme-accent', accent);
-            
-            saveCustomTheme(primary, secondary, accent);
-            alert('Tema aplicado correctamente!');
-        });
-
-        // Cerrar modales y paneles al hacer clic fuera
-        window.addEventListener('click', (e) => {
-            if (e.target === elements.programModal) {
-                elements.programModal.classList.remove('active');
-            }
-        });
-
-        // Manejar eventos de conexión
-        window.addEventListener('online', updateConnectionStatus);
-        window.addEventListener('offline', updateConnectionStatus);
-
-        // Inicialización
-        function init() {
-            updateCurrentTime();
-            setInterval(updateCurrentTime, 1000);
-            updateConnectionStatus();
-            updateTimerDisplay();
-            updateProgressBar();
-            
-            // Cargar datos guardados
-            loadFromStorage();
-            renderPrograms();
-            updateStatsPanel();
-            
-            const defaultCard = document.querySelector('.program-card[data-program="stopwatch"]');
-            if (defaultCard) {
-                handleProgramSelect(defaultCard);
             }
         }
-
-        // Iniciar aplicación
-        init();
+        
+        // Convertir mm:ss a segundos
+        function timeToSeconds(timeStr) {
+            const [mins, secs] = timeStr.split(':').map(Number);
+            return (mins * 60) + secs;
+        }
+        
+        // Convertir segundos a mm:ss
+        function secondsToTime(seconds) {
+            const mins = Math.floor(seconds / 60);
+            const secs = seconds % 60;
+            return `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+        }
+        
+        function setProgram(program) {
+            activeProgram = program;
+            
+            programBtns.forEach(btn => {
+                const isActive = btn.dataset.program === program;
+                btn.classList.toggle('active', isActive);
+                btn.classList.toggle('bg-base-200', !isActive);
+            });
+            
+            if (isTimerRunning) {
+                pauseTimer();
+            }
+            
+            switch(program) {
+                case 'clock':
+                    actionBtn.textContent = isConnected ? 'Desconectar dispositivo' : 'Enviar al dispositivo';
+                    updateClock();
+                    break;
+                case 'stopwatch':
+                    countDirection = 'up';
+                    timerValue = 0;
+                    stopwatchCentiseconds = 0;
+                    actionBtn.textContent = 'Iniciar';
+                    updateStopwatch();
+                    break;
+                case 'count-up':
+                    countDirection = 'up';
+                    timerValue = 0;
+                    actionBtn.textContent = 'Iniciar';
+                    updateTimerDisplay();
+                    break;
+                case 'count-down':
+                    countDirection = 'down';
+                    timerValue = programConfig['count-down'].initialTime;
+                    actionBtn.textContent = 'Iniciar';
+                    updateTimerDisplay();
+                    break;
+                case 'for-time':
+                    countDirection = 'up';
+                    timerValue = 0;
+                    actionBtn.textContent = 'Iniciar';
+                    updateTimerDisplay();
+                    break;
+                case 'amrap':
+                    countDirection = 'down';
+                    timerValue = programConfig['amrap'].duration;
+                    actionBtn.textContent = 'Iniciar';
+                    updateTimerDisplay();
+                    break;
+                case 'emom':
+                    countDirection = 'down';
+                    timerValue = programConfig['emom'].totalMinutes * 60;
+                    actionBtn.textContent = 'Iniciar';
+                    updateTimerDisplay();
+                    break;
+                case 'hiit':
+                    countDirection = programConfig['hiit'].direction;
+                    timerValue = programConfig['hiit'].warmup * 60;
+                    actionBtn.textContent = 'Iniciar';
+                    updateTimerDisplay();
+                    break;
+                case 'tabata':
+                    countDirection = 'down';
+                    timerValue = programConfig['tabata'].work;
+                    actionBtn.textContent = 'Iniciar';
+                    updateTimerDisplay();
+                    break;
+                default:
+                    if (program.startsWith('custom-')) {
+                        const customId = program.split('-')[1];
+                        const customProgram = customPrograms.find(p => p.id === customId);
+                        if (customProgram) {
+                            countDirection = customProgram.direction || 'down';
+                            timerValue = customProgram.initialTime || 300;
+                            actionBtn.textContent = 'Iniciar';
+                            updateTimerDisplay();
+                        }
+                    } else {
+                        timerValue = 600;
+                        countDirection = 'down';
+                        actionBtn.textContent = 'Iniciar';
+                        updateTimerDisplay();
+                    }
+            }
+        }
+        
+        function toggleEditMode() {
+            editMode = !editMode;
+            document.body.classList.toggle('edit-mode', editMode);
+            
+            const editIcon = editCorner.querySelector('i');
+            if (editMode) {
+                editIcon.className = 'fas fa-check';
+                customProgramBtn.classList.remove('hidden');
+                // Mostrar botones de eliminar en programas personalizados
+                document.querySelectorAll('.delete-custom').forEach(btn => {
+                    btn.style.display = 'flex';
+                });
+            } else {
+                editIcon.className = 'fas fa-pencil-alt';
+                customProgramBtn.classList.add('hidden');
+                // Ocultar botones de eliminar en programas personalizados
+                document.querySelectorAll('.delete-custom').forEach(btn => {
+                    btn.style.display = 'none';
+                });
+            }
+        }
+        
+        // Inicializar modales de configuración
+        function initProgramModals() {
+            // Programas con modal de configuración
+            const configurablePrograms = ['count-up', 'count-down', 'amrap', 'emom', 'hiit', 'tabata'];
+            
+            configurablePrograms.forEach(program => {
+                document.querySelector(`[data-program="${program}"]`).addEventListener('click', () => {
+                    if (editMode) {
+                        // Abrir modal de configuración específico
+                        switch(program) {
+                            case 'count-up':
+                                document.getElementById('count-up-max').value = 
+                                    secondsToTime(programConfig['count-up'].maxTime);
+                                countUpModal.showModal();
+                                break;
+                            case 'count-down':
+                                document.getElementById('count-down-init').value = 
+                                    secondsToTime(programConfig['count-down'].initialTime);
+                                countDownModal.showModal();
+                                break;
+                            case 'amrap':
+                                document.getElementById('amrap-duration').value = 
+                                    secondsToTime(programConfig['amrap'].duration);
+                                amrapModal.showModal();
+                                break;
+                            case 'emom':
+                                document.getElementById('emom-total').value = programConfig['emom'].totalMinutes;
+                                document.getElementById('emom-reps').value = programConfig['emom'].reps;
+                                emomModal.showModal();
+                                break;
+                            case 'hiit':
+                                document.getElementById('hiit-warmup').value = programConfig['hiit'].warmup;
+                                document.getElementById('hiit-work').value = programConfig['hiit'].work;
+                                document.getElementById('hiit-rest').value = programConfig['hiit'].rest;
+                                document.getElementById('hiit-rounds').value = programConfig['hiit'].rounds;
+                                document.getElementById('hiit-cooldown').value = programConfig['hiit'].cooldown;
+                                document.querySelector(`#hiit-${programConfig['hiit'].direction}`).checked = true;
+                                hiitModal.showModal();
+                                break;
+                            case 'tabata':
+                                document.getElementById('tabata-rounds').value = programConfig['tabata'].rounds;
+                                document.getElementById('tabata-work').value = programConfig['tabata'].work;
+                                document.getElementById('tabata-rest').value = programConfig['tabata'].rest;
+                                tabataModal.showModal();
+                                break;
+                        }
+                    } else {
+                        // No estamos en modo edición, seleccionar el programa
+                        setProgram(program);
+                    }
+                });
+            });
+            
+            // Programas sin configuración
+            ['clock', 'stopwatch', 'for-time'].forEach(program => {
+                document.querySelector(`[data-program="${program}"]`).addEventListener('click', () => {
+                    if (editMode) {
+                        // En modo edición, no hacemos nada para estos programas
+                        return;
+                    }
+                    setProgram(program);
+                });
+            });
+            
+            // Botón de creación de programas personalizados
+            customProgramBtn.addEventListener('click', () => {
+                if (editMode) {
+                    createProgramModal.showModal();
+                }
+            });
+            
+            // Aplicar cambios en los modales
+            document.getElementById('apply-count-up').addEventListener('click', () => {
+                programConfig['count-up'].maxTime = timeToSeconds(
+                    document.getElementById('count-up-max').value
+                );
+                setProgram('count-up');
+                countUpModal.close();
+            });
+            
+            document.getElementById('apply-count-down').addEventListener('click', () => {
+                programConfig['count-down'].initialTime = timeToSeconds(
+                    document.getElementById('count-down-init').value
+                );
+                setProgram('count-down');
+                countDownModal.close();
+            });
+            
+            document.getElementById('apply-amrap').addEventListener('click', () => {
+                programConfig['amrap'].duration = timeToSeconds(
+                    document.getElementById('amrap-duration').value
+                );
+                setProgram('amrap');
+                amrapModal.close();
+            });
+            
+            document.getElementById('apply-emom').addEventListener('click', () => {
+                programConfig['emom'].totalMinutes = parseInt(document.getElementById('emom-total').value);
+                programConfig['emom'].reps = parseInt(document.getElementById('emom-reps').value);
+                setProgram('emom');
+                emomModal.close();
+            });
+            
+            document.getElementById('apply-hiit').addEventListener('click', () => {
+                programConfig['hiit'].warmup = parseInt(document.getElementById('hiit-warmup').value);
+                programConfig['hiit'].work = parseInt(document.getElementById('hiit-work').value);
+                programConfig['hiit'].rest = parseInt(document.getElementById('hiit-rest').value);
+                programConfig['hiit'].rounds = parseInt(document.getElementById('hiit-rounds').value);
+                programConfig['hiit'].cooldown = parseInt(document.getElementById('hiit-cooldown').value);
+                programConfig['hiit'].direction = 
+                    document.querySelector('input[name="hiit-direction"]:checked').value;
+                setProgram('hiit');
+                hiitModal.close();
+            });
+            
+            document.getElementById('apply-tabata').addEventListener('click', () => {
+                programConfig['tabata'].rounds = parseInt(document.getElementById('tabata-rounds').value);
+                programConfig['tabata'].work = parseInt(document.getElementById('tabata-work').value);
+                programConfig['tabata'].rest = parseInt(document.getElementById('tabata-rest').value);
+                setProgram('tabata');
+                tabataModal.close();
+            });
+        }
+        
+        // Crear tarjeta de programa personalizado
+        function createCustomProgramCard(program) {
+            const card = document.createElement('div');
+            card.className = 'program-btn aspect-square bg-base-200 rounded-xl p-2 text-center cursor-pointer transition-all custom-program-card';
+            card.dataset.program = `custom-${program.id}`;
+            
+            const title = document.createElement('div');
+            title.className = 'btn-text';
+            title.textContent = program.name;
+            
+            const info = document.createElement('div');
+            info.className = 'program-info';
+            info.textContent = program.description || 'Programa personalizado';
+            
+            const deleteBtn = document.createElement('div');
+            deleteBtn.className = 'delete-custom';
+            deleteBtn.innerHTML = '×';
+            deleteBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                deleteCustomProgram(program.id);
+            });
+            
+            card.appendChild(title);
+            card.appendChild(info);
+            card.appendChild(deleteBtn);
+            
+            // Insertar antes del botón de crear
+            programsContainer.insertBefore(card, customProgramBtn);
+            
+            // Evento para seleccionar el programa
+            card.addEventListener('click', () => {
+                if (editMode) {
+                    // En modo edición, no hacemos nada (solo se puede eliminar)
+                    return;
+                }
+                setProgram(`custom-${program.id}`);
+            });
+        }
+        
+        // Eliminar programa personalizado
+        function deleteCustomProgram(id) {
+            customPrograms = customPrograms.filter(p => p.id !== id);
+            document.querySelector(`[data-program="custom-${id}"]`).remove();
+            saveCustomPrograms();
+        }
+        
+        // Guardar programas personalizados
+        function saveCustomPrograms() {
+            localStorage.setItem('customPrograms', JSON.stringify(customPrograms));
+        }
+        
+        // Cargar programas personalizados
+        function loadCustomPrograms() {
+            const saved = localStorage.getItem('customPrograms');
+            if (saved) {
+                customPrograms = JSON.parse(saved);
+                customPrograms.forEach(createCustomProgramCard);
+            }
+        }
+        
+        // Inicializar el modal de creación de programas personalizados
+        function initProgramCreationModal() {
+            const blockList = document.getElementById('blockList');
+            const $ = (id) => document.getElementById(id);
+            
+            const formatTimeInput = (input) => {
+                let v = input.value.replace(/\D/g, "").substring(0, 4);
+                if (v.length > 2) v = v.substring(0, 2) + ":" + v.substring(2);
+                input.value = v;
+            };
+            
+            const createSubBlock = (data = {}) => {
+                const template = document.getElementById('sub-block-template');
+                const clone = template.content.cloneNode(true);
+                const title = clone.querySelector('[data-action="edit-title"]');
+                if (data.name) title.textContent = data.name;
+                if (data.userEditedName) title.dataset.userEdited = "true";
+                clone.querySelector('[data-field="time"]').value = data.time || "";
+                clone.querySelector('[data-field="warning"]').value =
+                    data.warning || "";
+                const direction = data.direction || "up";
+                clone.querySelector('[data-field="direction"]').value = direction;
+                const dirButton = clone.querySelector(
+                    `[data-action="set-direction"][data-value="${direction}"]`
+                );
+                if (dirButton)
+                    dirButton.classList.add("bg-primary", "text-primary-content");
+                return clone;
+            };
+            
+            const createMainBlock = (data = {}) => {
+                const template = document.getElementById('main-block-template');
+                const clone = template.content.cloneNode(true);
+                const title = clone.querySelector('[data-action="edit-title"]');
+                const select = clone.querySelector('[data-field="repeat"]');
+                let repeatOptions =
+                    '<option value="1">No repetir este bloque</option>';
+                for (let i = 2; i <= 99; i++)
+                    repeatOptions += `<option value="${i}">Repetir ${i} veces</option>`;
+                select.innerHTML = repeatOptions;
+                if (data.name) title.textContent = data.name;
+                if (data.userEditedName) title.dataset.userEdited = "true";
+                select.value = data.repeat || 1;
+                const subBlockContainer = clone.querySelector(
+                    ".sub-block-list-container"
+                );
+                if (data.blocks && data.blocks.length > 0) {
+                    data.blocks.forEach((subBlockData) =>
+                        subBlockContainer.appendChild(createSubBlock(subBlockData))
+                    );
+                } else {
+                    subBlockContainer.appendChild(createSubBlock());
+                }
+                return clone;
+            };
+            
+            blockList.addEventListener("click", (e) => {
+                const button = e.target.closest("[data-action]");
+                if (!button) return;
+                const action = button.dataset.action;
+                const block = button.closest(".main-block, .block-item");
+                switch (action) {
+                    case "delete-block":
+                        block.remove();
+                        break;
+                    case "toggle-content":
+                        const content = block.querySelector(".content");
+                        content.classList.toggle("hidden");
+                        button.innerHTML = content.classList.contains("hidden")
+                            ? "▼"
+                            : "▲";
+                        break;
+                    case "add-sub-block":
+                        block
+                            .querySelector(".sub-block-list-container")
+                            .appendChild(createSubBlock());
+                        break;
+                    case "edit-title":
+                        if (button.querySelector("input")) return;
+                        const currentText = button.textContent;
+                        const input = document.createElement("input");
+                        input.type = "text";
+                        input.value = currentText;
+                        input.className = "input input-ghost input-xs w-full";
+                        input.addEventListener("blur", () => {
+                            const newValue = input.value.trim() || currentText;
+                            button.textContent = newValue;
+                            if (newValue && !newValue.match(/^(Bloque|Sub Bloque) \d+$/i)) {
+                                button.dataset.userEdited = "true";
+                            } else {
+                                delete button.dataset.userEdited;
+                            }
+                        });
+                        input.addEventListener(
+                            "keydown",
+                            (e) => e.key === "Enter" && e.target.blur()
+                        );
+                        button.innerHTML = "";
+                        button.appendChild(input);
+                        input.focus();
+                        break;
+                    case "set-direction":
+                        const parent = button.parentElement;
+                        parent
+                            .querySelectorAll("button")
+                            .forEach((btn) =>
+                                btn.classList.remove("bg-primary", "text-primary-content")
+                            );
+                        button.classList.add("bg-primary", "text-primary-content");
+                        parent.querySelector('input[data-field="direction"]').value =
+                            button.dataset.value;
+                        break;
+                }
+            });
+            
+            blockList.addEventListener("focusin", (e) => {
+                if (
+                    e.target.matches('[data-field="time"], [data-field="warning"]') &&
+                    !e.target.value
+                ) {
+                    e.target.value = "00:00";
+                }
+            });
+            
+            blockList.addEventListener("input", (e) => {
+                if (e.target.matches('[data-field="time"], [data-field="warning"]')) {
+                    formatTimeInput(e.target);
+                }
+            });
+            
+            $("addMainBlockBtn").addEventListener("click", () => {
+                blockList.appendChild(createMainBlock());
+            });
+            
+            $("cancelCreate").addEventListener("click", () => createProgramModal.close());
+        }
+        
+        // Eventos
+        actionBtn.addEventListener('click', () => {
+            if (activeProgram === 'clock') {
+                if (isConnected) {
+                    isConnected = false;
+                    actionBtn.textContent = 'Enviar al dispositivo';
+                } else {
+                    isConnected = true;
+                    actionBtn.textContent = 'Desconectar dispositivo';
+                }
+            } else {
+                toggleTimer();
+            }
+        });
+        
+        editCorner.addEventListener('click', toggleEditMode);
+        globalConfigBtn.addEventListener('click', () => configModal.showModal());
+        themeSwitcher.addEventListener('change', (e) => {
+            document.documentElement.setAttribute('data-theme', e.target.value);
+            if (e.target.value === 'light' || e.target.value === 'corporate') {
+                document.body.classList.add('light-theme');
+            } else {
+                document.body.classList.remove('light-theme');
+            }
+        });
+        
+        // Configuración del efecto de retroiluminación
+        glowEffectToggle.addEventListener('change', (e) => {
+            glowEffectEnabled = e.target.checked;
+            document.body.classList.toggle('glow-effect', glowEffectEnabled);
+        });
+        
+        // Configuración de intensidad LED
+        ledIntensity.addEventListener('input', (e) => {
+            const intensity = e.target.value;
+            document.documentElement.style.setProperty('--glow-intensity', `${intensity}px`);
+        });
+        
+        // Guardar configuración
+        document.getElementById('save-config').addEventListener('click', () => {
+            localStorage.setItem('glowEffect', glowEffectToggle.checked);
+            localStorage.setItem('ledIntensity', ledIntensity.value);
+            configModal.close();
+        });
+        
+        // Modo concentración
+        fullscreenBtn.addEventListener('click', () => {
+            if (activeProgram === 'clock') {
+                isFullscreen = true;
+                concentrationMode.classList.remove('hidden');
+            }
+        });
+        
+        concentrationActionBtn.addEventListener('click', toggleTimer);
+        minimizeBtn.addEventListener('click', () => {
+            isFullscreen = false;
+            concentrationMode.classList.add('hidden');
+        });
+        
+        // Crear programa personalizado
+        document.getElementById('programForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            
+            const programName = document.getElementById('program-name').value;
+            const programId = 'custom-' + Date.now();
+            
+            const newProgram = {
+                id: programId,
+                name: programName,
+                description: document.getElementById('program-description').value,
+                countdown: document.getElementById('countdown').value,
+                initialTime: 300, // Valor por defecto
+                direction: 'down'  // Valor por defecto
+            };
+            
+            customPrograms.push(newProgram);
+            createCustomProgramCard(newProgram);
+            saveCustomPrograms();
+            
+            createProgramModal.close();
+            document.getElementById('programForm').reset();
+        });
+        
+        // Cancelar creación de programa
+        document.getElementById('cancelCreate').addEventListener('click', () => {
+            createProgramModal.close();
+        });
+        
+        // Inicialización
+        function initApp() {
+            initDisplay();
+            initProgramModals();
+            initProgramCreationModal();
+            loadCustomPrograms();
+            setProgram('clock');
+            setInterval(updateClock, 1000);
+            
+            // Cargar configuración guardada
+            const savedGlow = localStorage.getItem('glowEffect');
+            if (savedGlow !== null) {
+                glowEffectEnabled = savedGlow === 'true';
+                glowEffectToggle.checked = glowEffectEnabled;
+                document.body.classList.toggle('glow-effect', glowEffectEnabled);
+            }
+            
+            const savedIntensity = localStorage.getItem('ledIntensity');
+            if (savedIntensity !== null) {
+                ledIntensity.value = savedIntensity;
+                document.documentElement.style.setProperty('--glow-intensity', `${savedIntensity}px`);
+            }
+        }
+        
+        // Iniciar la aplicación
+        initApp();
     </script>
 </body>
 </html>
