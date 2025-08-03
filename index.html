@@ -19,27 +19,43 @@
     </script>
     <style>
         :root {
+            /* Variables de diseño consistentes */
             --led-on: #00fffc;
             --led-off: rgba(0, 100, 100, 0.1);
             --glow-intensity: 10px;
+            --space-xs: 0.25rem;
+            --space-sm: 0.5rem;
+            --space-md: 1rem;
+            --space-lg: 1.5rem;
+            --radius-sm: 4px;
+            --radius-md: 8px;
+            --radius-lg: 12px;
+            --animation-fast: 150ms;
+            --animation-medium: 300ms;
+            --animation-slow: 500ms;
         }
+        
         .light-theme {
             --led-on: #00a8a8;
             --led-off: rgba(0, 0, 0, 0.05);
         }
+        
         .segment {
             position: absolute;
             background: var(--led-off);
             border-radius: 3px;
             transition: all 0.1s;
         }
+        
         .segment.on {
             background: var(--led-on);
             box-shadow: 0 0 var(--glow-intensity) var(--led-on);
         }
+        
         .glow-effect .segment.on {
             box-shadow: 0 0 15px 5px var(--led-on);
         }
+        
         .segment-a { width: 40px; height: 8px; top: 0; left: 10px; }
         .segment-b { width: 8px; height: 40px; top: 8px; right: 0; }
         .segment-c { width: 8px; height: 40px; bottom: 8px; right: 0; }
@@ -47,6 +63,7 @@
         .segment-e { width: 8px; height: 40px; bottom: 8px; left: 0; }
         .segment-f { width: 8px; height: 40px; top: 8px; left: 0; }
         .segment-g { width: 40px; height: 8px; top: 50%; left: 10px; transform: translateY(-50%); }
+        
         .colon {
             width: 15px;
             display: flex;
@@ -56,6 +73,7 @@
             margin: 0 5px;
             height: 100%;
         }
+        
         .colon-dot {
             width: 8px;
             height: 8px;
@@ -64,25 +82,34 @@
             margin: 15px 0;
             opacity: 0.7;
         }
-        @keyframes shake {
-            0% { transform: translateX(0); }
-            25% { transform: translateX(-3px); }
-            50% { transform: translateX(3px); }
-            75% { transform: translateX(-3px); }
-            100% { transform: translateX(0); }
+        
+        @keyframes edit-mode-indicator {
+            0% { opacity: 0.3; }
+            50% { opacity: 0.6; }
+            100% { opacity: 0.3; }
         }
-        @keyframes pulse {
-            0% { box-shadow: 0 0 0 0 rgba(0, 255, 252, 0.4); }
-            70% { box-shadow: 0 0 0 10px rgba(0, 255, 252, 0); }
-            100% { box-shadow: 0 0 0 0 rgba(0, 255, 252, 0); }
+        
+        .edit-mode-indicator {
+            position: absolute;
+            top: 4px;
+            right: 4px;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background-color: #3b82f6;
+            animation: edit-mode-indicator 2s infinite;
         }
+        
         .edit-mode .program-btn {
-            animation: pulse 2s infinite;
+            box-shadow: 0 0 0 2px #3b82f6 inset;
+            transition: all var(--animation-medium) ease;
         }
+        
         .edit-mode .program-btn:hover {
-            animation: shake 0.5s ease infinite;
-            transform: translateY(0);
+            transform: translateY(-2px);
+            box-shadow: 0 0 0 2px #3b82f6 inset, 0 4px 8px rgba(0, 0, 0, 0.1);
         }
+        
         .concentration-mode {
             position: fixed;
             top: 0;
@@ -97,20 +124,32 @@
             align-items: center;
             padding: 2rem;
         }
+        
         .concentration-display {
             transform: scale(1.5);
-            margin-bottom: 3rem;
+            margin-bottom: 1.5rem;
         }
+        
+        .progress-info {
+            font-size: 2rem;
+            color: var(--led-on);
+            text-align: center;
+            margin-bottom: 1.5rem;
+            min-height: 2.5rem;
+        }
+        
         .concentration-controls {
             opacity: 0.3;
-            transition: opacity 0.3s;
+            transition: opacity var(--animation-medium);
         }
+        
         .concentration-controls:hover {
             opacity: 1;
         }
+        
         .display-container {
             background: rgba(15, 15, 25, 0.9);
-            border-radius: 16px;
+            border-radius: var(--radius-lg);
             padding: 15px 25px;
             box-shadow: 
                 0 0 25px rgba(0, 0, 0, 0.6),
@@ -122,7 +161,16 @@
             justify-content: center;
             position: relative;
             overflow: hidden;
+            transition: all var(--animation-medium) ease;
         }
+        
+        .display-container:hover {
+            transform: translateY(-2px);
+            box-shadow: 
+                0 10px 25px rgba(0, 0, 0, 0.6),
+                inset 0 0 10px rgba(0, 0, 0, 0.4);
+        }
+        
         .digits {
             display: flex;
             justify-content: center;
@@ -132,6 +180,7 @@
             position: relative;
             padding: 5px 0;
         }
+        
         .digit-container {
             display: flex;
             justify-content: center;
@@ -140,6 +189,7 @@
             width: 100%;
             padding: 0 5px;
         }
+        
         .digit {
             position: relative;
             width: 60px; 
@@ -147,10 +197,11 @@
             margin: 0 3px;
             flex-shrink: 0;
         }
+        
         .fullscreen-btn {
             position: absolute;
-            top: 10px;
-            right: 10px;
+            top: var(--space-sm);
+            right: var(--space-sm);
             background: rgba(0, 150, 150, 0.3);
             border: none;
             border-radius: 50%;
@@ -162,15 +213,20 @@
             color: var(--led-on);
             cursor: pointer;
             opacity: 0.3;
-            transition: opacity 0.3s;
+            transition: all var(--animation-medium);
             z-index: 10;
         }
+        
         .fullscreen-btn:hover {
             opacity: 1;
+            background: rgba(0, 150, 150, 0.5);
+            transform: scale(1.1);
         }
+        
         .custom-program-card {
             position: relative;
         }
+        
         .delete-custom {
             position: absolute;
             top: -5px;
@@ -185,49 +241,71 @@
             justify-content: center;
             font-size: 12px;
             cursor: pointer;
+            transition: all var(--animation-fast);
+            z-index: 10;
         }
+        
+        .delete-custom:hover {
+            transform: scale(1.2);
+            background: #ff3333;
+        }
+        
         .edit-mode .custom-program-card .delete-custom {
             display: flex;
         }
+        
         .program-btn.active {
             background: #3b82f6 !important;
             color: white !important;
             transform: scale(1.05);
             box-shadow: 0 0 15px rgba(59, 130, 246, 0.5);
+            transition: all var(--animation-medium) ease;
         }
+        
         .program-btn.running {
             animation: pulse 1.5s infinite;
         }
+        
         .program-info {
             font-size: 0.75rem;
             color: #9ca3af;
             margin-top: 0.25rem;
         }
-        /* Corrección del botón minimizar en modo concentración */
-        .minimize-btn-container {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            z-index: 20;
-        }
         
-        /* Botones de control */
+        /* Control buttons */
         .control-buttons {
             display: flex;
-            gap: 1rem;
+            gap: var(--space-md);
             width: 100%;
         }
         
         .control-button {
             flex: 1;
             height: 3.5rem;
+            border-radius: var(--radius-md);
+            transition: all var(--animation-medium) ease;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        
+        .control-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+        }
+        
+        /* Edit mode indicator */
+        .edit-mode .edit-corner {
+            background-color: #3b82f6 !important;
+        }
+        
+        .edit-mode .edit-corner i {
+            animation: edit-mode-indicator 2s infinite;
         }
         
         /* Responsive improvements for mobile */
         @media (max-width: 768px) {
             .display-container {
                 padding: 10px 15px;
-                border-radius: 12px;
+                border-radius: var(--radius-md);
             }
             
             .digit {
@@ -267,7 +345,7 @@
         @media (max-width: 480px) {
             .display-container {
                 padding: 8px 12px;
-                border-radius: 10px;
+                border-radius: var(--radius-sm);
             }
             
             .digit {
@@ -336,6 +414,14 @@
             color: white;
             margin-top: 1rem;
         }
+        
+        /* Corrección del botón minimizar en modo concentración */
+        .minimize-btn-container {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            z-index: 20;
+        }
     </style>
 </head>
 <body class="h-full flex flex-col glow-effect">
@@ -366,8 +452,8 @@
         </div>
         <!-- Botones de acción principal -->
         <div class="control-buttons mt-4">
-            <button id="action-btn" class="btn btn-primary btn-lg control-button">Iniciar</button>
-            <button id="reset-btn" class="btn btn-secondary btn-lg control-button">Reset</button>
+            <button id="action-btn" class="btn btn-primary btn-lg control-button" aria-label="Iniciar temporizador" aria-pressed="false">Iniciar</button>
+            <button id="reset-btn" class="btn btn-secondary btn-lg control-button" aria-label="Reiniciar temporizador">Reset</button>
         </div>
         <!-- Programas de entrenamiento -->
         <div class="programs-section bg-base-100 rounded-2xl p-4 shadow-lg border border-base-300 relative mt-4">
@@ -400,6 +486,11 @@
                     <div class="btn-text">AMRAP</div>
                     <div class="program-info">Tantas rondas</div>
                 </div>
+                <!-- For Time ahora está inmediatamente después de AMRAP -->
+                <div class="program-btn aspect-square bg-base-200 rounded-xl p-2 text-center cursor-pointer transition-all" data-program="for-time">
+                    <div class="btn-text">For Time</div>
+                    <div class="program-info">Tiempo máximo</div>
+                </div>
                 <div class="program-btn aspect-square bg-base-200 rounded-xl p-2 text-center cursor-pointer transition-all" data-program="tabata">
                     <div class="btn-text">TABATA</div>
                     <div class="program-info">20s trabajo/10s desc</div>
@@ -411,10 +502,6 @@
                 <div class="program-btn aspect-square bg-base-200 rounded-xl p-2 text-center cursor-pointer transition-all" data-program="hiit">
                     <div class="btn-text">HIIT</div>
                     <div class="program-info">Entrenamiento intenso</div>
-                </div>
-                <div class="program-btn aspect-square bg-base-200 rounded-xl p-2 text-center cursor-pointer transition-all" data-program="for-time">
-                    <div class="btn-text">For Time</div>
-                    <div class="program-info">Tiempo total</div>
                 </div>
                 <div class="program-btn custom hidden aspect-square bg-base-200 border-2 border-dashed border-primary rounded-xl p-3 text-center cursor-pointer transition-all" data-program="custom">
                     <div class="custom-program-text text-primary font-semibold text-sm">
@@ -457,7 +544,7 @@
                 <div class="form-control mt-4">
                     <label class="label cursor-pointer justify-start gap-4">
                         <span class="label-text">Sonidos</span> 
-                        <input type="checkbox" class="toggle toggle-primary" checked />
+                        <input type="checkbox" id="sound-toggle" class="toggle toggle-primary" checked />
                     </label>
                 </div>
                 <div class="form-control mt-4">
@@ -494,6 +581,20 @@
                     </label>
                     <input type="range" min="1" max="10" value="8" class="range range-primary" id="led-intensity" />
                 </div>
+                <div class="form-control mt-4">
+                    <label class="label">
+                        <span class="label-text">Importar/Exportar programas</span>
+                    </label>
+                    <div class="flex gap-2">
+                        <button id="export-programs-btn" class="btn btn-outline btn-sm w-full">
+                            <i class="fas fa-download mr-1"></i> Exportar
+                        </button>
+                        <button id="import-programs-btn" class="btn btn-outline btn-sm w-full">
+                            <i class="fas fa-upload mr-1"></i> Importar
+                        </button>
+                    </div>
+                    <input type="file" id="import-file-input" accept=".json" class="hidden" />
+                </div>
             </div>
             <div class="modal-action">
                 <form method="dialog">
@@ -503,12 +604,12 @@
             </div>
         </div>
     </dialog>
-    <!-- Modal de creación de programas -->
+    <!-- Modal de creación/edición de programas -->
     <dialog id="create-program-modal" class="modal">
         <div class="modal-box max-w-md w-full">
             <form method="dialog" id="programForm">
                 <header class="flex justify-between items-center pb-2">
-                    <h3 class="font-bold text-lg">Crear programa</h3>
+                    <h3 class="font-bold text-lg" id="modal-title">Crear programa</h3>
                     <button type="button" class="btn btn-circle btn-ghost btn-sm" id="closeDialogBtn">
                         ×
                     </button>
@@ -565,7 +666,7 @@
                     >
                         Cancelar
                     </button>
-                    <button type="submit" class="btn btn-primary btn-sm">
+                    <button type="submit" class="btn btn-primary btn-sm" id="saveProgramBtn">
                         Guardar
                     </button>
                 </div>
@@ -651,6 +752,33 @@
             <div class="modal-action">
                 <button class="btn btn-ghost" id="cancel-amrap">Cancelar</button>
                 <button class="btn btn-primary" id="apply-amrap">Aplicar</button>
+            </div>
+        </div>
+    </dialog>
+    <!-- Modal FOR TIME -->
+    <dialog id="config-for-time-modal" class="modal">
+        <div class="modal-box">
+            <h3 class="font-bold text-lg">Configurar For Time</h3>
+            <div class="py-4">
+                <div class="form-control">
+                    <label class="label">
+                        <span class="label-text">Tiempo máximo (mm:ss)</span>
+                    </label>
+                    <input type="text" id="for-time-max" class="input input-bordered" placeholder="00:00" value="10:00">
+                </div>
+                <div class="collapse collapse-arrow mt-4">
+                    <input type="checkbox" class="peer" />
+                    <div class="collapse-title bg-base-200 text-sm font-medium">
+                        <i class="fas fa-info-circle mr-2"></i> ¿Qué es For Time?
+                    </div>
+                    <div class="collapse-content bg-base-100"> 
+                        <p class="py-2">For Time: Completa un circuito específico en el menor tiempo posible. El tiempo máximo establece el límite para completar el circuito.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-action">
+                <button class="btn btn-ghost" id="cancel-for-time">Cancelar</button>
+                <button class="btn btn-primary" id="apply-for-time">Aplicar</button>
             </div>
         </div>
     </dialog>
@@ -826,11 +954,15 @@
             </button>
         </div>
         <div class="concentration-display" id="concentration-display"></div>
+        <!-- Información de progreso -->
+        <div class="progress-info" id="progress-info">
+            <!-- Aquí se mostrará la información de progreso -->
+        </div>
         <div class="concentration-controls flex gap-4 mt-4">
-            <button class="btn btn-primary btn-circle" id="concentration-action-btn">
+            <button class="btn btn-primary btn-circle" id="concentration-action-btn" aria-label="Iniciar temporizador" aria-pressed="false">
                 <i class="fas fa-play"></i>
             </button>
-            <button class="btn btn-secondary btn-circle" id="concentration-reset-btn">
+            <button class="btn btn-secondary btn-circle" id="concentration-reset-btn" aria-label="Reiniciar temporizador">
                 <i class="fas fa-undo"></i>
             </button>
         </div>
@@ -1001,6 +1133,7 @@
                     ['a', 'b', 'c', 'd', 'e', 'f', 'g'],// 8
                     ['a', 'b', 'c', 'd', 'f', 'g']      // 9
                 ];
+                this.lastTimeStr = null;
                 this.initDisplay();
             }
             
@@ -1046,6 +1179,10 @@
             }
             
             updateDisplay(timeStr) {
+                // Evitar actualizaciones innecesarias
+                if (this.lastTimeStr === timeStr) return;
+                this.lastTimeStr = timeStr;
+                
                 const digits = this.container.querySelectorAll('.digit');
                 const timeChars = timeStr.replace(/:/g, '').split('');
                 
@@ -1068,6 +1205,141 @@
             }
         }
 
+        // Clase para manejar la lógica del temporizador
+        class Timer {
+            constructor() {
+                this.initialTime = 0;
+                this.currentTime = 0;
+                this.direction = 'down';
+                this.isRunning = false;
+                this.interval = null;
+                this.callbacks = [];
+            }
+            
+            setConfig(initialTime, direction) {
+                this.initialTime = initialTime;
+                this.currentTime = initialTime;
+                this.direction = direction;
+            }
+            
+            start() {
+                if (this.isRunning) return;
+                this.isRunning = true;
+                this.interval = setInterval(() => {
+                    this.tick();
+                    this.notify();
+                }, 1000);
+            }
+            
+            tick() {
+                if (this.direction === 'down' && this.currentTime > 0) {
+                    this.currentTime--;
+                } else if (this.direction === 'up') {
+                    this.currentTime++;
+                }
+            }
+            
+            pause() {
+                if (!this.isRunning) return;
+                this.isRunning = false;
+                clearInterval(this.interval);
+            }
+            
+            reset() {
+                this.pause();
+                this.currentTime = this.initialTime;
+                this.notify();
+            }
+            
+            addObserver(callback) {
+                this.callbacks.push(callback);
+            }
+            
+            notify() {
+                this.callbacks.forEach(callback => callback(this.currentTime));
+            }
+            
+            destroy() {
+                this.pause();
+                this.callbacks = [];
+            }
+        }
+
+        // Clase para manejar sonidos
+        class SoundManager {
+            constructor() {
+                this.soundEnabled = true;
+                this.startSound = null;
+                this.endSound = null;
+                this.initSounds();
+            }
+            
+            initSounds() {
+                // Sonido de inicio: tono suave de 440Hz durante 100ms
+                this.startSound = this.createTone(440, 0.1);
+                
+                // Sonido de fin: tono suave de 880Hz durante 150ms
+                this.endSound = this.createTone(880, 0.15);
+            }
+            
+            createTone(frequency, duration) {
+                const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                const oscillator = audioCtx.createOscillator();
+                const gainNode = audioCtx.createGain();
+                
+                oscillator.type = 'sine';
+                oscillator.frequency.value = frequency;
+                
+                gainNode.gain.value = 0.1;
+                gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+                
+                oscillator.connect(gainNode);
+                gainNode.connect(audioCtx.destination);
+                
+                oscillator.start();
+                oscillator.stop(audioCtx.currentTime + duration);
+                
+                // Retornar un objeto que puede ser clonado
+                return {
+                    play: () => {
+                        if (!this.soundEnabled) return;
+                        
+                        const newCtx = new (window.AudioContext || window.webkitAudioContext)();
+                        const newOscillator = newCtx.createOscillator();
+                        const newGainNode = newCtx.createGain();
+                        
+                        newOscillator.type = 'sine';
+                        newOscillator.frequency.value = frequency;
+                        
+                        newGainNode.gain.value = 0.1;
+                        newGainNode.gain.exponentialRampToValueAtTime(0.001, newCtx.currentTime + duration);
+                        
+                        newOscillator.connect(newGainNode);
+                        newGainNode.connect(newCtx.destination);
+                        
+                        newOscillator.start();
+                        newOscillator.stop(newCtx.currentTime + duration);
+                    }
+                };
+            }
+            
+            playStartSound() {
+                if (this.startSound) {
+                    this.startSound.play();
+                }
+            }
+            
+            playEndSound() {
+                if (this.endSound) {
+                    this.endSound.play();
+                }
+            }
+            
+            setEnabled(enabled) {
+                this.soundEnabled = enabled;
+            }
+        }
+
         // Estado de la aplicación
         const state = {
             activeProgram: 'clock',
@@ -1087,25 +1359,30 @@
             countdownInterval: null,
             countdownValue: 0,
             programConfig: {
-                'count-up': { maxTime: 300 },
-                'count-down': { initialTime: 300 },
-                'amrap': { duration: 300 },
-                'emom': { totalMinutes: 10, reps: 10 },
+                'count-up': { maxTime: 300, current: 0 }, // Agregado 'current' para seguimiento
+                'count-down': { initialTime: 300, current: 300 },
+                'amrap': { duration: 300, current: 300 },
+                'for-time': { maxTime: 600, current: 0 },
+                'emom': { totalMinutes: 10, reps: 10, current: 600 },
                 'hiit': { 
                     warmup: 5,
                     work: 20,
                     rest: 10,
                     rounds: 8,
                     cooldown: 5,
-                    direction: 'down'
+                    direction: 'down',
+                    currentPhase: 'warmup',
+                    currentRound: 0,
+                    current: 300
                 },
-                'tabata': { rounds: 8, work: 20, rest: 10 },
-                'for-time': { maxTime: 600 }
+                'tabata': { rounds: 8, work: 20, rest: 10, currentRound: 0, current: 20 },
             },
             customPrograms: [],
+            editingProgram: null,
             elements: {
                 display: null,
                 concentrationDisplay: null,
+                progressInfo: null,
                 actionBtn: null,
                 resetBtn: null,
                 concentrationActionBtn: null,
@@ -1127,7 +1404,13 @@
                 defaultCountdownSelect: null,
                 countdownOverlay: null,
                 countdownNumber: null,
-                countdownText: null
+                countdownText: null,
+                soundToggle: null,
+                exportProgramsBtn: null,
+                importProgramsBtn: null,
+                importFileInput: null,
+                modalTitle: null,
+                saveProgramBtn: null
             }
         };
 
@@ -1136,6 +1419,7 @@
             const els = state.elements;
             els.display = new SevenSegmentDisplay('display');
             els.concentrationDisplay = new SevenSegmentDisplay('concentration-display', true);
+            els.progressInfo = document.getElementById('progress-info');
             els.actionBtn = document.getElementById('action-btn');
             els.resetBtn = document.getElementById('reset-btn');
             els.concentrationActionBtn = document.getElementById('concentration-action-btn');
@@ -1158,6 +1442,12 @@
             els.countdownOverlay = document.getElementById('countdown-overlay');
             els.countdownNumber = document.getElementById('countdown-number');
             els.countdownText = document.getElementById('countdown-text');
+            els.soundToggle = document.getElementById('sound-toggle');
+            els.exportProgramsBtn = document.getElementById('export-programs-btn');
+            els.importProgramsBtn = document.getElementById('import-programs-btn');
+            els.importFileInput = document.getElementById('import-file-input');
+            els.modalTitle = document.getElementById('modal-title');
+            els.saveProgramBtn = document.getElementById('saveProgramBtn');
         }
 
         // Funciones de utilidad
@@ -1186,9 +1476,60 @@
                 const cents = remaining % 100;
                 
                 return `  ${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}:${String(cents).padStart(2, '0')}`;
+            },
+            
+            // Normaliza los programas para exportación
+            normalizeProgramsForExport() {
+                return state.customPrograms.map(program => ({
+                    id: program.id,
+                    name: program.name,
+                    description: program.description,
+                    countdown: program.countdown,
+                    initialTime: program.initialTime,
+                    direction: program.direction,
+                    blocks: program.blocks ? program.blocks.map(block => ({
+                        name: block.name,
+                        userEditedName: block.userEditedName,
+                        repeat: block.repeat,
+                        blocks: block.blocks ? block.blocks.map(subBlock => ({
+                            name: subBlock.name,
+                            userEditedName: subBlock.userEditedName,
+                            time: subBlock.time,
+                            warning: subBlock.warning,
+                            direction: subBlock.direction
+                        })) : []
+                    })) : []
+                }));
+            },
+            
+            // Normaliza los programas importados
+            normalizeImportedPrograms(programs) {
+                return programs.map(program => ({
+                    id: program.id || `custom-${Date.now()}`,
+                    name: program.name || 'Programa personalizado',
+                    description: program.description || '',
+                    countdown: program.countdown || '0',
+                    initialTime: program.initialTime || 300,
+                    direction: program.direction || 'down',
+                    blocks: program.blocks ? program.blocks.map(block => ({
+                        name: block.name || 'Bloque',
+                        userEditedName: block.userEditedName || false,
+                        repeat: block.repeat || '1',
+                        blocks: block.blocks ? block.blocks.map(subBlock => ({
+                            name: subBlock.name || 'Sub Bloque',
+                            userEditedName: subBlock.userEditedName || false,
+                            time: subBlock.time || '00:00',
+                            warning: subBlock.warning || '00:00',
+                            direction: subBlock.direction || 'up'
+                        })) : []
+                    })) : []
+                }));
             }
         };
 
+        // Servicio de sonido
+        const soundManager = new SoundManager();
+        
         // Lógica de cuenta regresiva
         const countdownLogic = {
             startCountdown(duration, callback) {
@@ -1298,7 +1639,9 @@
             _startTimerInternal() {
                 state.isTimerRunning = true;
                 state.elements.actionBtn.textContent = 'Pausar';
+                state.elements.actionBtn.setAttribute('aria-pressed', 'true');
                 state.elements.concentrationActionBtn.innerHTML = '<i class="fas fa-pause"></i>';
+                state.elements.concentrationActionBtn.setAttribute('aria-pressed', 'true');
                 
                 // Activar modo concentración para programas de temporizador
                 if (state.autoFullscreen && state.activeProgram !== 'clock') {
@@ -1316,6 +1659,9 @@
                     }
                 });
                 
+                // Reproducir sonido de inicio
+                soundManager.playStartSound();
+                
                 if (state.activeProgram === 'stopwatch') {
                     state.stopwatchCentiseconds = 0;
                     state.stopwatchInterval = setInterval(() => {
@@ -1324,18 +1670,317 @@
                     }, 10); // Intervalo de 10ms para centésimas
                 } else {
                     state.timerInterval = setInterval(() => {
-                        if (state.countDirection === 'down') {
-                            if (state.timerValue <= 0) {
-                                this.pauseTimer();
-                                return;
-                            }
-                            state.timerValue--;
-                        } else {
-                            state.timerValue++;
-                        }
-                        this.updateTimerDisplay();
+                        this._tickProgram();
                     }, 1000);
                 }
+            },
+            
+            _tickProgram() {
+                const program = state.activeProgram;
+                const config = state.programConfig[program];
+                
+                switch(program) {
+                    case 'count-up':
+                        if (state.timerValue >= config.maxTime) {
+                            this._stopProgram();
+                        } else {
+                            state.timerValue++;
+                            this.updateTimerDisplay();
+                            this._updateProgressInfo(program);
+                        }
+                        break;
+                    case 'count-down':
+                        if (state.timerValue <= 0) {
+                            this._stopProgram();
+                        } else {
+                            state.timerValue--;
+                            this.updateTimerDisplay();
+                            this._updateProgressInfo(program);
+                        }
+                        break;
+                    case 'amrap':
+                        if (state.timerValue <= 0) {
+                            this._stopProgram();
+                        } else {
+                            state.timerValue--;
+                            this.updateTimerDisplay();
+                            this._updateProgressInfo(program);
+                        }
+                        break;
+                    case 'for-time':
+                        state.timerValue++;
+                        this.updateTimerDisplay();
+                        this._updateProgressInfo(program);
+                        break;
+                    case 'emom':
+                        if (state.timerValue <= 0) {
+                            this._stopProgram();
+                        } else {
+                            state.timerValue--;
+                            this.updateTimerDisplay();
+                            this._updateProgressInfo(program);
+                        }
+                        break;
+                    case 'hiit':
+                        this._tickHiit();
+                        break;
+                    case 'tabata':
+                        this._tickTabata();
+                        break;
+                    default:
+                        if (program.startsWith('custom-')) {
+                            this._tickCustom();
+                        }
+                }
+            },
+            
+            _tickHiit() {
+                const config = state.programConfig.hiit;
+                const phaseDurations = {
+                    'warmup': config.warmup * 60,
+                    'work': config.work,
+                    'rest': config.rest,
+                    'cooldown': config.cooldown * 60
+                };
+                
+                // Si estamos en la fase de calentamiento
+                if (config.currentPhase === 'warmup') {
+                    if (state.timerValue <= 0) {
+                        // Pasar a la fase de trabajo
+                        config.currentPhase = 'work';
+                        state.timerValue = config.work;
+                    } else {
+                        state.timerValue--;
+                    }
+                } 
+                // Si estamos en la fase de trabajo
+                else if (config.currentPhase === 'work') {
+                    if (state.timerValue <= 0) {
+                        // Pasar a la fase de descanso
+                        config.currentPhase = 'rest';
+                        state.timerValue = config.rest;
+                    } else {
+                        state.timerValue--;
+                    }
+                }
+                // Si estamos en la fase de descanso
+                else if (config.currentPhase === 'rest') {
+                    if (state.timerValue <= 0) {
+                        // Incrementar ronda
+                        config.currentRound++;
+                        
+                        // Si terminaron todas las rondas
+                        if (config.currentRound >= config.rounds) {
+                            // Pasar a enfriamiento
+                            config.currentPhase = 'cooldown';
+                            state.timerValue = config.cooldown * 60;
+                        } else {
+                            // Volver a trabajo
+                            config.currentPhase = 'work';
+                            state.timerValue = config.work;
+                        }
+                    } else {
+                        state.timerValue--;
+                    }
+                }
+                // Si estamos en la fase de enfriamiento
+                else if (config.currentPhase === 'cooldown') {
+                    if (state.timerValue <= 0) {
+                        this._stopProgram();
+                    } else {
+                        state.timerValue--;
+                    }
+                }
+                
+                this.updateTimerDisplay();
+                this._updateProgressInfo('hiit');
+            },
+            
+            _tickTabata() {
+                const config = state.programConfig.tabata;
+                const totalRounds = config.rounds * 2;
+                
+                if (state.timerValue <= 0) {
+                    // Incrementar ronda
+                    config.currentRound++;
+                    
+                    // Si terminaron todas las rondas
+                    if (config.currentRound >= totalRounds) {
+                        this._stopProgram();
+                        return;
+                    }
+                    
+                    // Cambiar entre trabajo y descanso
+                    if (config.currentRound % 2 === 0) {
+                        // Tiempo de descanso
+                        state.timerValue = config.rest;
+                    } else {
+                        // Tiempo de trabajo
+                        state.timerValue = config.work;
+                    }
+                } else {
+                    state.timerValue--;
+                }
+                
+                this.updateTimerDisplay();
+                this._updateProgressInfo('tabata');
+            },
+            
+            _tickCustom() {
+                const config = state.programConfig[state.activeProgram];
+                const customId = state.activeProgram.split('-')[1];
+                const customProgram = state.customPrograms.find(p => p.id === customId);
+                
+                if (!customProgram || !customProgram.blocks || customProgram.blocks.length === 0) {
+                    this._stopProgram();
+                    return;
+                }
+                
+                // Manejar la lógica de bloques personalizados
+                if (!config.currentBlock) {
+                    config.currentBlock = {
+                        mainBlockIndex: 0,
+                        mainBlockRepeat: 0,
+                        subBlockIndex: 0,
+                        subBlockRepeat: 0,
+                        totalTime: 0
+                    };
+                }
+                
+                const mainBlock = customProgram.blocks[config.currentBlock.mainBlockIndex];
+                const subBlock = mainBlock.blocks[config.currentBlock.subBlockIndex];
+                const timeSecs = utils.timeToSeconds(subBlock.time);
+                
+                // Incrementar el tiempo total
+                config.currentBlock.totalTime++;
+                
+                // Si el tiempo actual es igual al tiempo del sub-bloque
+                if (config.currentBlock.totalTime >= timeSecs) {
+                    // Reiniciar el contador de tiempo
+                    config.currentBlock.totalTime = 0;
+                    
+                    // Incrementar el sub-bloque
+                    config.currentBlock.subBlockRepeat++;
+                    
+                    // Si ya completó todas las repeticiones del sub-bloque
+                    if (config.currentBlock.subBlockRepeat >= parseInt(subBlock.repeat || 1)) {
+                        config.currentBlock.subBlockRepeat = 0;
+                        config.currentBlock.subBlockIndex++;
+                        
+                        // Si ya completó todos los sub-bloques
+                        if (config.currentBlock.subBlockIndex >= mainBlock.blocks.length) {
+                            config.currentBlock.subBlockIndex = 0;
+                            config.currentBlock.mainBlockRepeat++;
+                            
+                            // Si ya completó todas las repeticiones del bloque principal
+                            if (config.currentBlock.mainBlockRepeat >= parseInt(mainBlock.repeat || 1)) {
+                                config.currentBlock.mainBlockRepeat = 0;
+                                config.currentBlock.mainBlockIndex++;
+                                
+                                // Si ya completó todos los bloques principales
+                                if (config.currentBlock.mainBlockIndex >= customProgram.blocks.length) {
+                                    this._stopProgram();
+                                    return;
+                                }
+                            }
+                        }
+                    }
+                }
+                
+                // Actualizar el tiempo actual
+                if (subBlock.direction === 'down') {
+                    if (state.timerValue <= 0) {
+                        // Deberíamos pasar al siguiente sub-bloque, pero ya lo manejamos arriba
+                        state.timerValue = timeSecs;
+                    } else {
+                        state.timerValue--;
+                    }
+                } else {
+                    state.timerValue++;
+                }
+                
+                this.updateTimerDisplay();
+                this._updateProgressInfo('custom');
+            },
+            
+            _updateProgressInfo(program) {
+                const progressInfo = state.elements.progressInfo;
+                if (!progressInfo) return;
+                
+                // Solo mostrar información para programas que realmente necesitan
+                switch(program) {
+                    case 'hiit':
+                        const hiitConfig = state.programConfig.hiit;
+                        let phaseText = '';
+                        
+                        switch(hiitConfig.currentPhase) {
+                            case 'warmup':
+                                phaseText = 'Calentamiento';
+                                break;
+                            case 'work':
+                                phaseText = 'Trabajo';
+                                break;
+                            case 'rest':
+                                phaseText = 'Descanso';
+                                break;
+                            case 'cooldown':
+                                phaseText = 'Enfriamiento';
+                                break;
+                        }
+                        
+                        progressInfo.textContent = `Fase: ${phaseText} | Ronda: ${hiitConfig.currentRound + 1}/${hiitConfig.rounds}`;
+                        break;
+                    case 'tabata':
+                        const tabataConfig = state.programConfig.tabata;
+                        const totalRounds = tabataConfig.rounds * 2;
+                        const currentRound = tabataConfig.currentRound + 1;
+                        const phase = (tabataConfig.currentRound % 2 === 0) ? 'Trabajo' : 'Descanso';
+                        
+                        progressInfo.textContent = `Ronda: ${Math.floor(currentRound / 2) + 1}/${tabataConfig.rounds} | ${phase}`;
+                        break;
+                    case 'emom':
+                        const emomTotal = state.programConfig.emom.totalMinutes * 60;
+                        const emomRemaining = state.timerValue;
+                        const emomMinutes = Math.floor(emomRemaining / 60);
+                        const emomSeconds = emomRemaining % 60;
+                        progressInfo.textContent = `Tiempo restante: ${String(emomMinutes).padStart(2, '0')}:${String(emomSeconds).padStart(2, '0')}`;
+                        break;
+                    case 'custom':
+                        const customId = state.activeProgram.split('-')[1];
+                        const customProgram = state.customPrograms.find(p => p.id === customId);
+                        const config = state.programConfig[state.activeProgram];
+                        
+                        if (customProgram && config.currentBlock) {
+                            const mainBlock = customProgram.blocks[config.currentBlock.mainBlockIndex];
+                            const subBlock = mainBlock.blocks[config.currentBlock.subBlockIndex];
+                            
+                            let mainBlockText = mainBlock.name;
+                            if (mainBlock.userEditedName) {
+                                mainBlockText = mainBlock.name;
+                            } else {
+                                mainBlockText = `Bloque ${config.currentBlock.mainBlockIndex + 1}`;
+                            }
+                            
+                            let subBlockText = subBlock.name;
+                            if (subBlock.userEditedName) {
+                                subBlockText = subBlock.name;
+                            } else {
+                                subBlockText = `Sub Bloque ${config.currentBlock.subBlockIndex + 1}`;
+                            }
+                            
+                            progressInfo.textContent = `${mainBlockText} > ${subBlockText}`;
+                        }
+                        break;
+                    default:
+                        // Para otros programas, no mostramos información adicional
+                        progressInfo.textContent = '';
+                }
+            },
+            
+            _stopProgram() {
+                this.pauseTimer();
+                soundManager.playEndSound();
+                state.elements.progressInfo.textContent = '';
             },
             
             pauseTimer() {
@@ -1347,7 +1992,9 @@
                 
                 state.isTimerRunning = false;
                 state.elements.actionBtn.textContent = 'Iniciar';
+                state.elements.actionBtn.setAttribute('aria-pressed', 'false');
                 state.elements.concentrationActionBtn.innerHTML = '<i class="fas fa-play"></i>';
+                state.elements.concentrationActionBtn.setAttribute('aria-pressed', 'false');
                 
                 // Habilitar programas
                 state.elements.programBtns.forEach(btn => {
@@ -1367,46 +2014,79 @@
                     case 'clock':
                         // El reloj no se resetea, solo actualizamos
                         this.updateClock();
+                        state.elements.progressInfo.textContent = '';
                         break;
                     case 'stopwatch':
                         state.stopwatchCentiseconds = 0;
                         this.updateStopwatch();
+                        state.elements.progressInfo.textContent = '';
                         break;
                     case 'count-up':
                         state.timerValue = 0;
                         this.updateTimerDisplay();
+                        state.elements.progressInfo.textContent = '';
                         break;
                     case 'count-down':
                         state.timerValue = state.programConfig['count-down'].initialTime;
                         this.updateTimerDisplay();
+                        state.elements.progressInfo.textContent = '';
                         break;
                     case 'for-time':
                         state.timerValue = 0;
                         this.updateTimerDisplay();
+                        state.elements.progressInfo.textContent = '';
                         break;
                     case 'amrap':
                         state.timerValue = state.programConfig['amrap'].duration;
                         this.updateTimerDisplay();
+                        state.elements.progressInfo.textContent = '';
                         break;
                     case 'emom':
                         state.timerValue = state.programConfig['emom'].totalMinutes * 60;
                         this.updateTimerDisplay();
+                        state.elements.progressInfo.textContent = '';
                         break;
                     case 'hiit':
-                        state.timerValue = state.programConfig['hiit'].warmup * 60;
+                        // Reiniciar configuración HIIT
+                        const hiitConfig = state.programConfig.hiit;
+                        hiitConfig.currentPhase = 'warmup';
+                        hiitConfig.currentRound = 0;
+                        state.timerValue = hiitConfig.warmup * 60;
                         this.updateTimerDisplay();
+                        state.elements.progressInfo.textContent = '';
                         break;
                     case 'tabata':
-                        state.timerValue = state.programConfig['tabata'].work;
+                        // Reiniciar configuración TABATA
+                        const tabataConfig = state.programConfig.tabata;
+                        tabataConfig.currentRound = 0;
+                        state.timerValue = tabataConfig.work;
                         this.updateTimerDisplay();
+                        state.elements.progressInfo.textContent = '';
                         break;
                     default:
                         if (state.activeProgram.startsWith('custom-')) {
                             const customId = state.activeProgram.split('-')[1];
                             const customProgram = state.customPrograms.find(p => p.id === customId);
                             if (customProgram) {
-                                state.timerValue = customProgram.initialTime || 300;
+                                // Reiniciar configuración del programa personalizado
+                                const config = state.programConfig[state.activeProgram];
+                                config.currentBlock = {
+                                    mainBlockIndex: 0,
+                                    mainBlockRepeat: 0,
+                                    subBlockIndex: 0,
+                                    subBlockRepeat: 0,
+                                    totalTime: 0
+                                };
+                                
+                                // Obtener el primer sub-bloque
+                                const firstMainBlock = customProgram.blocks[0];
+                                const firstSubBlock = firstMainBlock.blocks[0];
+                                const timeSecs = utils.timeToSeconds(firstSubBlock.time);
+                                
+                                state.countDirection = firstSubBlock.direction || 'down';
+                                state.timerValue = timeSecs;
                                 this.updateTimerDisplay();
+                                state.elements.progressInfo.textContent = '';
                             }
                         }
                 }
@@ -1431,31 +2111,42 @@
                 switch(program) {
                     case 'clock':
                         state.elements.actionBtn.textContent = state.isConnected ? 'Desconectar dispositivo' : 'Enviar al dispositivo';
+                        state.elements.actionBtn.setAttribute('aria-pressed', 'false');
+                        state.elements.concentrationActionBtn.setAttribute('aria-pressed', 'false');
                         timerLogic.updateClock();
+                        state.elements.progressInfo.textContent = '';
                         break;
                     case 'stopwatch':
                         this.setupStopwatch();
+                        state.elements.progressInfo.textContent = '';
                         break;
                     case 'count-up':
                         this.setupCountUp();
+                        state.elements.progressInfo.textContent = '';
                         break;
                     case 'count-down':
                         this.setupCountDown();
+                        state.elements.progressInfo.textContent = '';
                         break;
                     case 'for-time':
                         this.setupForTime();
+                        state.elements.progressInfo.textContent = '';
                         break;
                     case 'amrap':
                         this.setupAmrap();
+                        state.elements.progressInfo.textContent = '';
                         break;
                     case 'emom':
                         this.setupEmom();
+                        state.elements.progressInfo.textContent = '';
                         break;
                     case 'hiit':
                         this.setupHiit();
+                        state.elements.progressInfo.textContent = '';
                         break;
                     case 'tabata':
                         this.setupTabata();
+                        state.elements.progressInfo.textContent = '';
                         break;
                     default:
                         if (program.startsWith('custom-')) {
@@ -1469,6 +2160,7 @@
                 state.timerValue = 0;
                 state.stopwatchCentiseconds = 0;
                 state.elements.actionBtn.textContent = 'Iniciar';
+                state.elements.actionBtn.setAttribute('aria-pressed', 'false');
                 timerLogic.updateStopwatch();
             },
             
@@ -1476,6 +2168,7 @@
                 state.countDirection = 'up';
                 state.timerValue = 0;
                 state.elements.actionBtn.textContent = 'Iniciar';
+                state.elements.actionBtn.setAttribute('aria-pressed', 'false');
                 timerLogic.updateTimerDisplay();
             },
             
@@ -1483,6 +2176,7 @@
                 state.countDirection = 'down';
                 state.timerValue = state.programConfig['count-down'].initialTime;
                 state.elements.actionBtn.textContent = 'Iniciar';
+                state.elements.actionBtn.setAttribute('aria-pressed', 'false');
                 timerLogic.updateTimerDisplay();
             },
             
@@ -1490,6 +2184,7 @@
                 state.countDirection = 'up';
                 state.timerValue = 0;
                 state.elements.actionBtn.textContent = 'Iniciar';
+                state.elements.actionBtn.setAttribute('aria-pressed', 'false');
                 timerLogic.updateTimerDisplay();
             },
             
@@ -1497,6 +2192,7 @@
                 state.countDirection = 'down';
                 state.timerValue = state.programConfig['amrap'].duration;
                 state.elements.actionBtn.textContent = 'Iniciar';
+                state.elements.actionBtn.setAttribute('aria-pressed', 'false');
                 timerLogic.updateTimerDisplay();
             },
             
@@ -1504,20 +2200,28 @@
                 state.countDirection = 'down';
                 state.timerValue = state.programConfig['emom'].totalMinutes * 60;
                 state.elements.actionBtn.textContent = 'Iniciar';
+                state.elements.actionBtn.setAttribute('aria-pressed', 'false');
                 timerLogic.updateTimerDisplay();
             },
             
             setupHiit() {
                 state.countDirection = state.programConfig['hiit'].direction;
-                state.timerValue = state.programConfig['hiit'].warmup * 60;
+                const hiitConfig = state.programConfig.hiit;
+                hiitConfig.currentPhase = 'warmup';
+                hiitConfig.currentRound = 0;
+                state.timerValue = hiitConfig.warmup * 60;
                 state.elements.actionBtn.textContent = 'Iniciar';
+                state.elements.actionBtn.setAttribute('aria-pressed', 'false');
                 timerLogic.updateTimerDisplay();
             },
             
             setupTabata() {
                 state.countDirection = 'down';
-                state.timerValue = state.programConfig['tabata'].work;
+                const tabataConfig = state.programConfig.tabata;
+                tabataConfig.currentRound = 0;
+                state.timerValue = tabataConfig.work;
                 state.elements.actionBtn.textContent = 'Iniciar';
+                state.elements.actionBtn.setAttribute('aria-pressed', 'false');
                 timerLogic.updateTimerDisplay();
             },
             
@@ -1525,9 +2229,28 @@
                 const customId = program.split('-')[1];
                 const customProgram = state.customPrograms.find(p => p.id === customId);
                 if (customProgram) {
-                    state.countDirection = customProgram.direction || 'down';
-                    state.timerValue = customProgram.initialTime || 300;
+                    // Configurar el estado para el programa personalizado
+                    if (!state.programConfig[program]) {
+                        state.programConfig[program] = {
+                            currentBlock: {
+                                mainBlockIndex: 0,
+                                mainBlockRepeat: 0,
+                                subBlockIndex: 0,
+                                subBlockRepeat: 0,
+                                totalTime: 0
+                            }
+                        };
+                    }
+                    
+                    // Obtener el primer sub-bloque
+                    const firstMainBlock = customProgram.blocks[0];
+                    const firstSubBlock = firstMainBlock.blocks[0];
+                    const timeSecs = utils.timeToSeconds(firstSubBlock.time);
+                    
+                    state.countDirection = firstSubBlock.direction || 'down';
+                    state.timerValue = timeSecs;
                     state.elements.actionBtn.textContent = 'Iniciar';
+                    state.elements.actionBtn.setAttribute('aria-pressed', 'false');
                     timerLogic.updateTimerDisplay();
                 }
             }
@@ -1563,9 +2286,85 @@
                 
                 // Evento para seleccionar el programa
                 card.addEventListener('click', () => {
-                    if (state.editMode) return;
-                    programLogic.setProgram(`custom-${program.id}`);
+                    if (state.editMode) {
+                        // En modo edición, mostrar modal de edición
+                        this.editCustomProgram(program);
+                    } else {
+                        programLogic.setProgram(`custom-${program.id}`);
+                    }
                 });
+            },
+            
+            editCustomProgram(program) {
+                state.editingProgram = program;
+                state.elements.modalTitle.textContent = 'Editar programa';
+                state.elements.saveProgramBtn.textContent = 'Actualizar';
+                
+                // Limpiar el bloque list
+                document.getElementById('blockList').innerHTML = '';
+                
+                // Cargar los datos del programa en el modal
+                document.getElementById('program-name').value = program.name;
+                document.getElementById('program-description').value = program.description || '';
+                document.getElementById('countdown').value = program.countdown || '0';
+                
+                // Crear los bloques
+                if (program.blocks && program.blocks.length > 0) {
+                    program.blocks.forEach(block => {
+                        document.getElementById('blockList').appendChild(
+                            this.createMainBlockForEdit(block)
+                        );
+                    });
+                } else {
+                    // Añadir un bloque vacío si no hay
+                    document.getElementById('blockList').appendChild(
+                        this.createMainBlockForEdit()
+                    );
+                }
+                
+                // Mostrar el modal
+                state.elements.createProgramModal.showModal();
+            },
+            
+            createMainBlockForEdit(blockData = {}) {
+                const template = document.getElementById('main-block-template');
+                const clone = template.content.cloneNode(true);
+                const title = clone.querySelector('[data-action="edit-title"]');
+                const select = clone.querySelector('[data-field="repeat"]');
+                
+                let repeatOptions = '<option value="1">No repetir este bloque</option>';
+                for (let i = 2; i <= 99; i++) repeatOptions += `<option value="${i}">Repetir ${i} veces</option>`;
+                select.innerHTML = repeatOptions;
+                
+                if (blockData.name) title.textContent = blockData.name;
+                if (blockData.userEditedName) title.dataset.userEdited = "true";
+                select.value = blockData.repeat || 1;
+                
+                const subBlockContainer = clone.querySelector(".sub-block-list-container");
+                if (blockData.blocks && blockData.blocks.length > 0) {
+                    blockData.blocks.forEach(subBlockData => subBlockContainer.appendChild(
+                        this.createSubBlockForEdit(subBlockData)
+                    ));
+                } else {
+                    subBlockContainer.appendChild(this.createSubBlockForEdit());
+                }
+                
+                return clone;
+            },
+            
+            createSubBlockForEdit(subBlockData = {}) {
+                const template = document.getElementById('sub-block-template');
+                const clone = template.content.cloneNode(true);
+                const title = clone.querySelector('[data-action="edit-title"]');
+                if (subBlockData.name) title.textContent = subBlockData.name;
+                if (subBlockData.userEditedName) title.dataset.userEdited = "true";
+                clone.querySelector('[data-field="time"]').value = subBlockData.time || "";
+                clone.querySelector('[data-field="warning"]').value = subBlockData.warning || "";
+                const direction = subBlockData.direction || "up";
+                clone.querySelector('[data-field="direction"]').value = direction;
+                const dirButton = clone.querySelector(`[data-action="set-direction"][data-value="${direction}"]`);
+                if (dirButton) dirButton.classList.add("bg-primary", "text-primary-content");
+                return clone;
             },
             
             deleteCustomProgram(id) {
@@ -1584,10 +2383,66 @@
                     state.customPrograms = JSON.parse(saved);
                     state.customPrograms.forEach(p => this.createCustomProgramCard(p));
                 }
+            },
+            
+            exportPrograms() {
+                const normalizedPrograms = utils.normalizeProgramsForExport();
+                const dataStr = "text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(normalizedPrograms, null, 2));
+                const downloadAnchorNode = document.createElement('a');
+                downloadAnchorNode.setAttribute("href", dataStr);
+                downloadAnchorNode.setAttribute("download", "fitness-timer-programs.json");
+                document.body.appendChild(downloadAnchorNode);
+                downloadAnchorNode.click();
+                downloadAnchorNode.remove();
+            },
+            
+            importPrograms(file) {
+                const reader = new FileReader();
+                
+                reader.onload = (e) => {
+                    try {
+                        const importedPrograms = JSON.parse(e.target.result);
+                        const normalizedPrograms = utils.normalizeImportedPrograms(importedPrograms);
+                        
+                        // Eliminar programas personalizados existentes
+                        state.customPrograms = [];
+                        document.querySelectorAll('.custom-program-card').forEach(card => {
+                            card.remove();
+                        });
+                        
+                        // Agregar los nuevos programas
+                        state.customPrograms = normalizedPrograms;
+                        state.customPrograms.forEach(p => this.createCustomProgramCard(p));
+                        
+                        this.saveCustomPrograms();
+                        
+                        // Mostrar mensaje de éxito
+                        const notification = document.createElement('div');
+                        notification.className = 'alert alert-success fixed bottom-4 right-4 z-50';
+                        notification.textContent = `${normalizedPrograms.length} programas importados correctamente`;
+                        document.body.appendChild(notification);
+                        
+                        setTimeout(() => {
+                            notification.remove();
+                        }, 3000);
+                    } catch (error) {
+                        // Mostrar mensaje de error
+                        const notification = document.createElement('div');
+                        notification.className = 'alert alert-error fixed bottom-4 right-4 z-50';
+                        notification.textContent = 'Error al importar programas: archivo inválido';
+                        document.body.appendChild(notification);
+                        
+                        setTimeout(() => {
+                            notification.remove();
+                        }, 3000);
+                    }
+                };
+                
+                reader.readAsText(file);
             }
         };
 
-        // Inicialización del modal de creación de programas
+        // Inicialización del modal de creación/edición de programas
         function initProgramCreationModal() {
             const blockList = document.getElementById('blockList');
             
@@ -1729,20 +2584,79 @@
             document.getElementById('programForm').addEventListener('submit', (e) => {
                 e.preventDefault();
                 const programName = document.getElementById('program-name').value;
-                const programId = 'custom-' + Date.now();
-                const newProgram = {
+                const programId = state.editingProgram ? state.editingProgram.id : 'custom-' + Date.now();
+                
+                // Obtener la estructura de bloques
+                const blocks = [];
+                blockList.querySelectorAll('.main-block').forEach(mainBlock => {
+                    const mainBlockTitle = mainBlock.querySelector('[data-action="edit-title"]');
+                    const repeat = mainBlock.querySelector('[data-field="repeat"]').value;
+                    
+                    const subBlocks = [];
+                    mainBlock.querySelectorAll('.block-item').forEach(subBlock => {
+                        const subBlockTitle = subBlock.querySelector('[data-action="edit-title"]');
+                        const time = subBlock.querySelector('[data-field="time"]').value;
+                        const warning = subBlock.querySelector('[data-field="warning"]').value;
+                        const direction = subBlock.querySelector('[data-field="direction"]').value;
+                        
+                        subBlocks.push({
+                            name: subBlockTitle.textContent,
+                            userEditedName: !!subBlockTitle.dataset.userEdited,
+                            time: time || '00:00',
+                            warning: warning || '00:00',
+                            direction: direction || 'up'
+                        });
+                    });
+                    
+                    blocks.push({
+                        name: mainBlockTitle.textContent,
+                        userEditedName: !!mainBlockTitle.dataset.userEdited,
+                        repeat: repeat,
+                        blocks: subBlocks
+                    });
+                });
+                
+                // Crear o actualizar el programa
+                const program = {
                     id: programId,
                     name: programName,
                     description: document.getElementById('program-description').value,
                     countdown: document.getElementById('countdown').value,
                     initialTime: 300,
-                    direction: 'down'
+                    direction: 'down',
+                    blocks: blocks
                 };
                 
-                state.customPrograms.push(newProgram);
-                customPrograms.createCustomProgramCard(newProgram);
+                if (state.editingProgram) {
+                    // Actualizar programa existente
+                    const index = state.customPrograms.findIndex(p => p.id === programId);
+                    if (index !== -1) {
+                        state.customPrograms[index] = program;
+                    }
+                } else {
+                    // Crear nuevo programa
+                    state.customPrograms.push(program);
+                }
+                
+                // Actualizar UI
+                if (state.editingProgram) {
+                    // Actualizar tarjeta existente
+                    const card = document.querySelector(`[data-program="custom-${programId}"]`);
+                    if (card) {
+                        const title = card.querySelector('.btn-text');
+                        const info = card.querySelector('.program-info');
+                        title.textContent = programName;
+                        info.textContent = program.description || 'Programa personalizado';
+                    }
+                } else {
+                    // Crear nueva tarjeta
+                    customPrograms.createCustomProgramCard(program);
+                }
+                
+                // Guardar y cerrar
                 customPrograms.saveCustomPrograms();
                 state.elements.createProgramModal.close();
+                state.editingProgram = null;
                 document.getElementById('programForm').reset();
                 blockList.innerHTML = '';
             });
@@ -1761,6 +2675,7 @@
                     state.isConnected = !state.isConnected;
                     state.elements.actionBtn.textContent = state.isConnected ? 
                         'Desconectar dispositivo' : 'Enviar al dispositivo';
+                    state.elements.actionBtn.setAttribute('aria-pressed', state.isConnected.toString());
                 } else {
                     state.isTimerRunning ? timerLogic.pauseTimer() : timerLogic.startTimer();
                 }
@@ -1825,12 +2740,35 @@
                 document.documentElement.style.setProperty('--glow-intensity', `${e.target.value}px`);
             });
             
+            // Sonidos
+            state.elements.soundToggle.addEventListener('change', (e) => {
+                soundManager.setEnabled(e.target.checked);
+            });
+            
+            // Exportar programas
+            state.elements.exportProgramsBtn.addEventListener('click', () => {
+                customPrograms.exportPrograms();
+            });
+            
+            // Importar programas
+            state.elements.importProgramsBtn.addEventListener('click', () => {
+                state.elements.importFileInput.click();
+            });
+            
+            state.elements.importFileInput.addEventListener('change', (e) => {
+                if (e.target.files.length > 0) {
+                    customPrograms.importPrograms(e.target.files[0]);
+                }
+                e.target.value = '';
+            });
+            
             // Guardar configuración
             document.getElementById('save-config').addEventListener('click', () => {
                 localStorage.setItem('glowEffect', state.elements.glowEffectToggle.checked);
                 localStorage.setItem('ledIntensity', state.elements.ledIntensity.value);
                 localStorage.setItem('autoFullscreen', state.elements.autoFullscreenToggle.checked);
                 localStorage.setItem('defaultCountdown', state.defaultCountdown);
+                localStorage.setItem('soundEnabled', state.elements.soundToggle.checked);
             });
             
             // Modo concentración - ahora funciona con todos los programas
@@ -1850,15 +2788,21 @@
             
             // Crear programa personalizado
             state.elements.customProgramBtn.addEventListener('click', () => {
-                if (state.editMode) state.elements.createProgramModal.showModal();
+                if (state.editMode) {
+                    state.editingProgram = null;
+                    state.elements.modalTitle.textContent = 'Crear programa';
+                    state.elements.saveProgramBtn.textContent = 'Guardar';
+                    state.elements.createProgramModal.showModal();
+                }
             });
             
             // Configuración de programas
-            const configurablePrograms = ['count-up', 'count-down', 'amrap', 'emom', 'hiit', 'tabata'];
+            const configurablePrograms = ['count-up', 'count-down', 'amrap', 'for-time', 'emom', 'hiit', 'tabata'];
             const modals = {
                 'count-up': document.getElementById('config-count-up-modal'),
                 'count-down': document.getElementById('config-count-down-modal'),
                 'amrap': document.getElementById('config-amrap-modal'),
+                'for-time': document.getElementById('config-for-time-modal'),
                 'emom': document.getElementById('config-emom-modal'),
                 'hiit': document.getElementById('config-hiit-modal'),
                 'tabata': document.getElementById('config-tabata-modal')
@@ -1869,6 +2813,7 @@
                 'count-up': document.getElementById('cancel-count-up'),
                 'count-down': document.getElementById('cancel-count-down'),
                 'amrap': document.getElementById('cancel-amrap'),
+                'for-time': document.getElementById('cancel-for-time'),
                 'emom': document.getElementById('cancel-emom'),
                 'hiit': document.getElementById('cancel-hiit'),
                 'tabata': document.getElementById('cancel-tabata')
@@ -1879,6 +2824,7 @@
                 'count-up': document.getElementById('apply-count-up'),
                 'count-down': document.getElementById('apply-count-down'),
                 'amrap': document.getElementById('apply-amrap'),
+                'for-time': document.getElementById('apply-for-time'),
                 'emom': document.getElementById('apply-emom'),
                 'hiit': document.getElementById('apply-hiit'),
                 'tabata': document.getElementById('apply-tabata')
@@ -1915,6 +2861,11 @@
                             case 'amrap':
                                 state.programConfig['amrap'].duration = utils.timeToSeconds(
                                     document.getElementById('amrap-duration').value
+                                );
+                                break;
+                            case 'for-time':
+                                state.programConfig['for-time'].maxTime = utils.timeToSeconds(
+                                    document.getElementById('for-time-max').value
                                 );
                                 break;
                             case 'emom':
@@ -1961,6 +2912,10 @@
                                 document.getElementById('amrap-duration').value = 
                                     utils.secondsToTime(state.programConfig['amrap'].duration);
                                 break;
+                            case 'for-time':
+                                document.getElementById('for-time-max').value = 
+                                    utils.secondsToTime(state.programConfig['for-time'].maxTime);
+                                break;
                             case 'emom':
                                 document.getElementById('emom-total').value = state.programConfig['emom'].totalMinutes;
                                 document.getElementById('emom-reps').value = state.programConfig['emom'].reps;
@@ -1989,10 +2944,37 @@
             });
             
             // Programas sin configuración
-            ['clock', 'stopwatch', 'for-time'].forEach(program => {
+            ['clock', 'stopwatch'].forEach(program => {
                 document.querySelector(`[data-program="${program}"]`).addEventListener('click', () => {
                     if (!state.editMode) programLogic.setProgram(program);
                 });
+            });
+            
+            // Soporte para teclado
+            document.addEventListener('keydown', (e) => {
+                // Espacio para play/pausa
+                if (e.key === ' ' && state.activeProgram !== 'clock') {
+                    e.preventDefault();
+                    state.isTimerRunning ? timerLogic.pauseTimer() : timerLogic.startTimer();
+                }
+                
+                // Esc para salir del modo concentración
+                if (e.key === 'Escape' && state.isFullscreen) {
+                    state.isFullscreen = false;
+                    state.elements.concentrationMode.classList.add('hidden');
+                }
+                
+                // Tecla R para reset
+                if (e.key === 'r' || e.key === 'R') {
+                    e.preventDefault();
+                    timerLogic.resetTimer();
+                }
+                
+                // Tecla E para entrar/salir del modo edición
+                if ((e.key === 'e' || e.key === 'E') && (e.ctrlKey || e.metaKey)) {
+                    e.preventDefault();
+                    state.elements.editCorner.click();
+                }
             });
         }
 
@@ -2037,6 +3019,16 @@
                 if (state.elements.defaultCountdownSelect) {
                     state.elements.defaultCountdownSelect.value = state.defaultCountdown;
                 }
+            }
+            
+            const savedSoundEnabled = localStorage.getItem('soundEnabled');
+            if (savedSoundEnabled !== null) {
+                const isEnabled = savedSoundEnabled === 'true';
+                state.elements.soundToggle.checked = isEnabled;
+                soundManager.setEnabled(isEnabled);
+            } else {
+                state.elements.soundToggle.checked = true;
+                soundManager.setEnabled(true);
             }
         }
 
