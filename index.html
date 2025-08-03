@@ -23,28 +23,23 @@
             --led-off: rgba(0, 100, 100, 0.1);
             --glow-intensity: 10px;
         }
-        
         .light-theme {
             --led-on: #00a8a8;
             --led-off: rgba(0, 0, 0, 0.05);
         }
-        
         .segment {
             position: absolute;
             background: var(--led-off);
             border-radius: 3px;
             transition: all 0.1s;
         }
-        
         .segment.on {
             background: var(--led-on);
             box-shadow: 0 0 var(--glow-intensity) var(--led-on);
         }
-        
         .glow-effect .segment.on {
             box-shadow: 0 0 15px 5px var(--led-on);
         }
-        
         .segment-a { width: 40px; height: 8px; top: 0; left: 10px; }
         .segment-b { width: 8px; height: 40px; top: 8px; right: 0; }
         .segment-c { width: 8px; height: 40px; bottom: 8px; right: 0; }
@@ -52,7 +47,6 @@
         .segment-e { width: 8px; height: 40px; bottom: 8px; left: 0; }
         .segment-f { width: 8px; height: 40px; top: 8px; left: 0; }
         .segment-g { width: 40px; height: 8px; top: 50%; left: 10px; transform: translateY(-50%); }
-        
         .colon {
             width: 15px;
             display: flex;
@@ -62,7 +56,6 @@
             margin: 0 5px;
             height: 100%;
         }
-        
         .colon-dot {
             width: 8px;
             height: 8px;
@@ -71,7 +64,6 @@
             margin: 15px 0;
             opacity: 0.7;
         }
-        
         @keyframes shake {
             0% { transform: translateX(0); }
             25% { transform: translateX(-3px); }
@@ -79,22 +71,18 @@
             75% { transform: translateX(-3px); }
             100% { transform: translateX(0); }
         }
-        
         @keyframes pulse {
             0% { box-shadow: 0 0 0 0 rgba(0, 255, 252, 0.4); }
             70% { box-shadow: 0 0 0 10px rgba(0, 255, 252, 0); }
             100% { box-shadow: 0 0 0 0 rgba(0, 255, 252, 0); }
         }
-
         .edit-mode .program-btn {
             animation: pulse 2s infinite;
         }
-        
         .edit-mode .program-btn:hover {
             animation: shake 0.5s ease infinite;
             transform: translateY(0);
         }
-        
         .concentration-mode {
             position: fixed;
             top: 0;
@@ -109,21 +97,17 @@
             align-items: center;
             padding: 2rem;
         }
-        
         .concentration-display {
             transform: scale(1.5);
             margin-bottom: 3rem;
         }
-        
         .concentration-controls {
             opacity: 0.3;
             transition: opacity 0.3s;
         }
-        
         .concentration-controls:hover {
             opacity: 1;
         }
-        
         .display-container {
             background: rgba(15, 15, 25, 0.9);
             border-radius: 16px;
@@ -139,7 +123,6 @@
             position: relative;
             overflow: hidden;
         }
-        
         .digits {
             display: flex;
             justify-content: center;
@@ -149,7 +132,6 @@
             position: relative;
             padding: 5px 0;
         }
-        
         .digit-container {
             display: flex;
             justify-content: center;
@@ -158,7 +140,6 @@
             width: 100%;
             padding: 0 5px;
         }
-        
         .digit {
             position: relative;
             width: 60px; 
@@ -166,7 +147,6 @@
             margin: 0 3px;
             flex-shrink: 0;
         }
-        
         .fullscreen-btn {
             position: absolute;
             top: 10px;
@@ -185,15 +165,12 @@
             transition: opacity 0.3s;
             z-index: 10;
         }
-        
         .fullscreen-btn:hover {
             opacity: 1;
         }
-        
         .custom-program-card {
             position: relative;
         }
-        
         .delete-custom {
             position: absolute;
             top: -5px;
@@ -209,29 +186,50 @@
             font-size: 12px;
             cursor: pointer;
         }
-        
         .edit-mode .custom-program-card .delete-custom {
             display: flex;
         }
-        
         .program-btn.active {
             background: #3b82f6 !important;
             color: white !important;
             transform: scale(1.05);
             box-shadow: 0 0 15px rgba(59, 130, 246, 0.5);
         }
-        
         .program-btn.running {
             animation: pulse 1.5s infinite;
         }
-        
         .program-info {
             font-size: 0.75rem;
             color: #9ca3af;
             margin-top: 0.25rem;
         }
+        /* Corrección del botón minimizar en modo concentración */
+        .minimize-btn-container {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            z-index: 20;
+        }
         
-        @media (max-width: 480px) {
+        /* Botones de control */
+        .control-buttons {
+            display: flex;
+            gap: 1rem;
+            width: 100%;
+        }
+        
+        .control-button {
+            flex: 1;
+            height: 3.5rem;
+        }
+        
+        /* Responsive improvements for mobile */
+        @media (max-width: 768px) {
+            .display-container {
+                padding: 10px 15px;
+                border-radius: 12px;
+            }
+            
             .digit {
                 width: 45px;
                 height: 75px;
@@ -254,6 +252,89 @@
                 height: 6px;
                 margin: 12px 0;
             }
+            
+            .fullscreen-btn {
+                width: 25px;
+                height: 25px;
+            }
+            
+            .control-button {
+                height: 3rem;
+                font-size: 0.875rem;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .display-container {
+                padding: 8px 12px;
+                border-radius: 10px;
+            }
+            
+            .digit {
+                width: 35px;
+                height: 55px;
+            }
+            
+            .segment-a { width: 22px; height: 4px; left: 5px; }
+            .segment-b { width: 4px; height: 22px; top: 4px; }
+            .segment-c { width: 4px; height: 22px; bottom: 4px; }
+            .segment-d { width: 22px; height: 4px; left: 5px; }
+            .segment-e { width: 4px; height: 22px; bottom: 4px; }
+            .segment-f { width: 4px; height: 22px; top: 4px; }
+            .segment-g { width: 22px; height: 4px; left: 5px; }
+            
+            .colon {
+                width: 10px;
+            }
+            
+            .colon-dot {
+                width: 4px;
+                height: 4px;
+                margin: 8px 0;
+            }
+            
+            .fullscreen-btn {
+                width: 20px;
+                height: 20px;
+            }
+            
+            .concentration-display {
+                transform: scale(1.2);
+            }
+            
+            .control-button {
+                height: 2.5rem;
+                font-size: 0.75rem;
+            }
+        }
+        
+        /* Countdown overlay */
+        .countdown-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+            display: none;
+        }
+        
+        .countdown-number {
+            font-size: 10rem;
+            color: var(--led-on);
+            text-shadow: 0 0 15px var(--led-on);
+            font-weight: bold;
+        }
+        
+        .countdown-text {
+            font-size: 2rem;
+            color: white;
+            margin-top: 1rem;
         }
     </style>
 </head>
@@ -274,7 +355,6 @@
             </div>
         </div>
     </nav>
-    
     <!-- Contenido principal -->
     <main class="container mx-auto p-4 max-w-lg flex-1 flex flex-col">
         <!-- Display principal optimizado -->
@@ -284,16 +364,16 @@
             </button>
             <div class="digits" id="display"></div>
         </div>
-        
-        <!-- Botón de acción principal inteligente -->
-        <button id="action-btn" class="btn btn-primary btn-lg w-full my-4">Iniciar</button>
-        
+        <!-- Botones de acción principal -->
+        <div class="control-buttons mt-4">
+            <button id="action-btn" class="btn btn-primary btn-lg control-button">Iniciar</button>
+            <button id="reset-btn" class="btn btn-secondary btn-lg control-button">Reset</button>
+        </div>
         <!-- Programas de entrenamiento -->
-        <div class="programs-section bg-base-100 rounded-2xl p-4 shadow-lg border border-base-300 relative">
+        <div class="programs-section bg-base-100 rounded-2xl p-4 shadow-lg border border-base-300 relative mt-4">
             <div class="edit-corner absolute top-0 right-0 w-10 h-10 flex items-center justify-center bg-primary text-primary-content rounded-bl-2xl cursor-pointer" id="edit-corner">
                 <i class="fas fa-pencil-alt"></i>
             </div>
-            
             <div class="section-header mb-4">
                 <h2 class="section-title text-lg font-semibold text-center">
                     Programas de Entrenamiento
@@ -345,14 +425,12 @@
             </div>
         </div>
     </main>
-    
     <!-- Footer -->
     <footer class="footer footer-center p-4 bg-base-300 text-base-content">
         <aside>
             <p>Conectado a dispositivo físico • Versión 2.5</p>
         </aside>
     </footer>
-
     <!-- Modales -->
     <!-- Modal de configuración global -->
     <dialog id="config-modal" class="modal">
@@ -376,21 +454,40 @@
                         <option value="dark">Dark</option>
                     </select>
                 </div>
-                
                 <div class="form-control mt-4">
                     <label class="label cursor-pointer justify-start gap-4">
                         <span class="label-text">Sonidos</span> 
                         <input type="checkbox" class="toggle toggle-primary" checked />
                     </label>
                 </div>
-                
                 <div class="form-control mt-4">
                     <label class="label cursor-pointer justify-start gap-4">
                         <span class="label-text">Efecto retroiluminación</span> 
                         <input type="checkbox" id="glow-effect-toggle" class="toggle toggle-primary" checked />
                     </label>
                 </div>
-                
+                <div class="form-control mt-4">
+                    <label class="label cursor-pointer justify-start gap-4">
+                        <span class="label-text">Maximización automática</span> 
+                        <input type="checkbox" id="auto-fullscreen-toggle" class="toggle toggle-primary" checked />
+                    </label>
+                </div>
+                <div class="form-control mt-4">
+                    <label class="label">
+                        <span class="label-text">Cuenta regresiva por defecto</span>
+                    </label>
+                    <select id="default-countdown" class="select select-bordered">
+                        <option value="0">0 segundos</option>
+                        <option value="3">3 segundos</option>
+                        <option value="5">5 segundos</option>
+                        <option value="10">10 segundos</option>
+                        <option value="15">15 segundos</option>
+                        <option value="20">20 segundos</option>
+                        <option value="30">30 segundos</option>
+                        <option value="45">45 segundos</option>
+                        <option value="60">60 segundos</option>
+                    </select>
+                </div>
                 <div class="form-control mt-4">
                     <label class="label">
                         <span class="label-text">Intensidad de LEDs</span>
@@ -406,7 +503,6 @@
             </div>
         </div>
     </dialog>
-
     <!-- Modal de creación de programas -->
     <dialog id="create-program-modal" class="modal">
         <div class="modal-box max-w-md w-full">
@@ -476,7 +572,6 @@
             </form>
         </div>
     </dialog>
-
     <!-- Modales de configuración de programas -->
     <!-- Modal Contador Ascendente -->
     <dialog id="config-count-up-modal" class="modal">
@@ -505,7 +600,6 @@
             </div>
         </div>
     </dialog>
-
     <!-- Modal Contador Descendente -->
     <dialog id="config-count-down-modal" class="modal">
         <div class="modal-box">
@@ -533,7 +627,6 @@
             </div>
         </div>
     </dialog>
-
     <!-- Modal AMRAP -->
     <dialog id="config-amrap-modal" class="modal">
         <div class="modal-box">
@@ -561,7 +654,6 @@
             </div>
         </div>
     </dialog>
-
     <!-- Modal EMOM -->
     <dialog id="config-emom-modal" class="modal">
         <div class="modal-box">
@@ -595,7 +687,6 @@
             </div>
         </div>
     </dialog>
-
     <!-- Modal HIIT -->
     <dialog id="config-hiit-modal" class="modal">
         <div class="modal-box">
@@ -686,7 +777,6 @@
             </div>
         </div>
     </dialog>
-
     <!-- Modal TABATA -->
     <dialog id="config-tabata-modal" class="modal">
         <div class="modal-box">
@@ -728,20 +818,28 @@
             </div>
         </div>
     </dialog>
-
     <!-- Modo concentración -->
     <div class="concentration-mode hidden" id="concentration-mode">
+        <div class="minimize-btn-container">
+            <button class="btn btn-ghost text-white" id="minimize-btn">
+                <i class="fas fa-compress"></i>
+            </button>
+        </div>
         <div class="concentration-display" id="concentration-display"></div>
-        <div class="concentration-controls flex gap-4">
-            <button class="btn btn-primary" id="concentration-action-btn">
+        <div class="concentration-controls flex gap-4 mt-4">
+            <button class="btn btn-primary btn-circle" id="concentration-action-btn">
                 <i class="fas fa-play"></i>
             </button>
-            <button class="btn btn-ghost text-white" id="minimize-btn">
-                <i class="fas fa-compress"></i> Minimizar
+            <button class="btn btn-secondary btn-circle" id="concentration-reset-btn">
+                <i class="fas fa-undo"></i>
             </button>
         </div>
     </div>
-
+    <!-- Overlay de cuenta regresiva -->
+    <div class="countdown-overlay" id="countdown-overlay">
+        <div class="countdown-number" id="countdown-number">3</div>
+        <div class="countdown-text" id="countdown-text">¡Listo para empezar!</div>
+    </div>
     <!-- Plantillas para bloques -->
     <template id="main-block-template">
       <article
@@ -797,7 +895,6 @@
         </div>
       </article>
     </template>
-    
     <template id="sub-block-template">
       <article
         class="card mb-1 shadow hover:shadow-lg transition-all duration-200 bg-base-100 border border-base-content/10 block-item"
@@ -860,7 +957,6 @@
                       <i class="fas fa-info text-[0.55rem]"></i>
                     </button>
                   </div>
-                  
                   <div class="flex rounded-full border border-base-content/10 bg-base-100">
                     <button
                       type="button"
@@ -887,613 +983,613 @@
         </div>
       </article>
     </template>
-
     <script>
-        // Configuración
-        const digitMap = [
-            ['a', 'b', 'c', 'd', 'e', 'f'],     // 0
-            ['b', 'c'],                          // 1
-            ['a', 'b', 'g', 'e', 'd'],          // 2
-            ['a', 'b', 'g', 'c', 'd'],          // 3
-            ['f', 'g', 'b', 'c'],               // 4
-            ['a', 'f', 'g', 'c', 'd'],          // 5
-            ['a', 'f', 'g', 'c', 'd', 'e'],     // 6
-            ['a', 'b', 'c'],                    // 7
-            ['a', 'b', 'c', 'd', 'e', 'f', 'g'],// 8
-            ['a', 'b', 'c', 'd', 'f', 'g']      // 9
-        ];
-        
-        // Estado
-        let activeProgram = 'clock';
-        let timerValue = 0;
-        let isTimerRunning = false;
-        let timerInterval;
-        let countDirection = 'down';
-        let isConnected = false;
-        let editMode = false;
-        let stopwatchCentiseconds = 0;
-        let stopwatchInterval = null;
-        let isFullscreen = false;
-        let glowEffectEnabled = true;
-        
-        // Configuraciones de programas
-        const programConfig = {
-            'count-up': { maxTime: 300 }, // 5 min en segundos
-            'count-down': { initialTime: 300 },
-            'amrap': { duration: 300 },
-            'emom': { totalMinutes: 10, reps: 10 },
-            'hiit': { 
-                warmup: 5, // min
-                work: 20, // seg
-                rest: 10, // seg
-                rounds: 8,
-                cooldown: 5, // min
-                direction: 'down'
-            },
-            'tabata': { rounds: 8, work: 20, rest: 10 },
-            'for-time': { maxTime: 600 } // 10 min
-        };
-        
-        // Programas personalizados
-        let customPrograms = [];
-        
-        // Elementos
-        const display = document.getElementById('display');
-        const actionBtn = document.getElementById('action-btn');
-        const programBtns = document.querySelectorAll('.program-btn');
-        const globalConfigBtn = document.getElementById('global-config-btn');
-        const editCorner = document.getElementById('edit-corner');
-        const configModal = document.getElementById('config-modal');
-        const createProgramModal = document.getElementById('create-program-modal');
-        const themeSwitcher = document.getElementById('themeSwitcher');
-        const customProgramBtn = document.querySelector('.program-btn.custom');
-        const fullscreenBtn = document.getElementById('fullscreen-btn');
-        const concentrationMode = document.getElementById('concentration-mode');
-        const concentrationDisplay = document.getElementById('concentration-display');
-        const concentrationActionBtn = document.getElementById('concentration-action-btn');
-        const minimizeBtn = document.getElementById('minimize-btn');
-        const programsContainer = document.getElementById('programs-container');
-        const glowEffectToggle = document.getElementById('glow-effect-toggle');
-        const ledIntensity = document.getElementById('led-intensity');
-
-        // Modales de configuración
-        const countUpModal = document.getElementById('config-count-up-modal');
-        const countDownModal = document.getElementById('config-count-down-modal');
-        const amrapModal = document.getElementById('config-amrap-modal');
-        const emomModal = document.getElementById('config-emom-modal');
-        const hiitModal = document.getElementById('config-hiit-modal');
-        const tabataModal = document.getElementById('config-tabata-modal');
-
-        // Inicializar display con dígitos
-        function initDisplay() {
-            display.innerHTML = '';
-            
-            // Crear contenedor para los dígitos
-            const digitContainer = document.createElement('div');
-            digitContainer.className = 'digit-container flex';
-            
-            // Crear dígitos y dos puntos en formato HH:MM:SS
-            for (let i = 0; i < 8; i++) {
-                if (i === 2 || i === 5) {
-                    // Crear dos puntos
-                    const colon = document.createElement('div');
-                    colon.className = 'colon';
-                    colon.innerHTML = '<div class="colon-dot"></div><div class="colon-dot"></div>';
-                    digitContainer.appendChild(colon);
-                } else {
-                    // Crear dígito
-                    digitContainer.appendChild(createDigit());
-                }
+        // Clase para manejar el display de 7 segmentos
+        class SevenSegmentDisplay {
+            constructor(containerId, isConcentrationMode = false) {
+                this.container = document.getElementById(containerId);
+                this.isConcentrationMode = isConcentrationMode;
+                this.digitMap = [
+                    ['a', 'b', 'c', 'd', 'e', 'f'],     // 0
+                    ['b', 'c'],                          // 1
+                    ['a', 'b', 'g', 'e', 'd'],          // 2
+                    ['a', 'b', 'g', 'c', 'd'],          // 3
+                    ['f', 'g', 'b', 'c'],               // 4
+                    ['a', 'f', 'g', 'c', 'd'],          // 5
+                    ['a', 'f', 'g', 'c', 'd', 'e'],     // 6
+                    ['a', 'b', 'c'],                    // 7
+                    ['a', 'b', 'c', 'd', 'e', 'f', 'g'],// 8
+                    ['a', 'b', 'c', 'd', 'f', 'g']      // 9
+                ];
+                this.initDisplay();
             }
             
-            display.appendChild(digitContainer);
-            
-            // Clonar display para modo concentración
-            concentrationDisplay.innerHTML = '';
-            concentrationDisplay.appendChild(digitContainer.cloneNode(true));
-        }
-        
-        function createDigit() {
-            const digit = document.createElement('div');
-            digit.className = 'digit relative';
-            digit.style.width = '60px';
-            digit.style.height = '100px';
-            digit.style.margin = '0 3px';
-            digit.style.flexShrink = '0';
-            
-            ['a', 'b', 'c', 'd', 'e', 'f', 'g'].forEach(seg => {
-                const segment = document.createElement('div');
-                segment.className = `segment segment-${seg}`;
-                digit.appendChild(segment);
-            });
-            
-            return digit;
-        }
-        
-        function updateDigit(digit, num) {
-            const segments = digit.querySelectorAll('.segment');
-            segments.forEach(s => s.classList.remove('on'));
-            
-            if (num === ' ') return;
-            
-            digitMap[num].forEach(s => {
-                digit.querySelector(`.segment-${s}`).classList.add('on');
-            });
-        }
-        
-        function updateDisplay(timeStr) {
-            const digits = display.querySelectorAll('.digit');
-            const timeChars = timeStr.replace(/:/g, '').split('');
-            
-            for (let i = 0; i < digits.length; i++) {
-                if (timeChars[i] === ' ') {
-                    updateDigit(digits[i], ' ');
-                } else {
-                    updateDigit(digits[i], parseInt(timeChars[i]));
-                }
-            }
-            
-            // Actualizar también el display del modo concentración
-            if (isFullscreen) {
-                const concentrationDigits = concentrationDisplay.querySelectorAll('.digit');
-                for (let i = 0; i < concentrationDigits.length; i++) {
-                    if (timeChars[i] === ' ') {
-                        updateDigit(concentrationDigits[i], ' ');
+            initDisplay() {
+                this.container.innerHTML = '';
+                const digitContainer = document.createElement('div');
+                digitContainer.className = 'digit-container flex';
+                
+                // Crear dígitos y dos puntos en formato HH:MM:SS o MM:SS:CC
+                for (let i = 0; i < 8; i++) {
+                    if (i === 2 || i === 5) {
+                        const colon = document.createElement('div');
+                        colon.className = 'colon';
+                        colon.innerHTML = '<div class="colon-dot"></div><div class="colon-dot"></div>';
+                        digitContainer.appendChild(colon);
                     } else {
-                        updateDigit(concentrationDigits[i], parseInt(timeChars[i]));
+                        digitContainer.appendChild(this.createDigit());
+                    }
+                }
+                
+                this.container.appendChild(digitContainer);
+                return this.container;
+            }
+            
+            createDigit() {
+                const digit = document.createElement('div');
+                digit.className = 'digit relative';
+                ['a', 'b', 'c', 'd', 'e', 'f', 'g'].forEach(seg => {
+                    const segment = document.createElement('div');
+                    segment.className = `segment segment-${seg}`;
+                    digit.appendChild(segment);
+                });
+                return digit;
+            }
+            
+            updateDigit(digit, num) {
+                const segments = digit.querySelectorAll('.segment');
+                segments.forEach(s => s.classList.remove('on'));
+                if (num === ' ') return;
+                this.digitMap[num].forEach(s => {
+                    digit.querySelector(`.segment-${s}`).classList.add('on');
+                });
+            }
+            
+            updateDisplay(timeStr) {
+                const digits = this.container.querySelectorAll('.digit');
+                const timeChars = timeStr.replace(/:/g, '').split('');
+                
+                for (let i = 0; i < digits.length; i++) {
+                    if (timeChars[i] === ' ') {
+                        this.updateDigit(digits[i], ' ');
+                    } else {
+                        this.updateDigit(digits[i], parseInt(timeChars[i]));
                     }
                 }
                 
                 // Parpadeo de los dos puntos
-                const colons = concentrationDisplay.querySelectorAll('.colon-dot');
+                const colons = this.container.querySelectorAll('.colon-dot');
                 const now = new Date();
-                const visible = activeProgram === 'clock' ? 
-                    (now.getSeconds() % 2 === 0) : 
-                    (isTimerRunning && timerValue % 2 === 0);
+                const visible = this.isConcentrationMode ? 
+                    (state.isTimerRunning && state.timerValue % 2 === 0) :
+                    (state.activeProgram === 'clock' ? (now.getSeconds() % 2 === 0) : (state.isTimerRunning && state.timerValue % 2 === 0));
                 
                 colons.forEach(dot => dot.style.opacity = visible ? '0.8' : '0.3');
             }
-            
-            // Parpadeo de los dos puntos
-            const colons = display.querySelectorAll('.colon-dot');
-            const now = new Date();
-            const visible = activeProgram === 'clock' ? 
-                (now.getSeconds() % 2 === 0) : 
-                (isTimerRunning && timerValue % 2 === 0);
-            
-            colons.forEach(dot => dot.style.opacity = visible ? '0.8' : '0.3');
         }
-        
-        function updateClock() {
-            if (activeProgram === 'clock') {
+
+        // Estado de la aplicación
+        const state = {
+            activeProgram: 'clock',
+            timerValue: 0,
+            isTimerRunning: false,
+            timerInterval: null,
+            countDirection: 'down',
+            isConnected: false,
+            editMode: false,
+            stopwatchCentiseconds: 0,
+            stopwatchInterval: null,
+            isFullscreen: false,
+            glowEffectEnabled: true,
+            autoFullscreen: true,
+            defaultCountdown: 3,
+            countdownActive: false,
+            countdownInterval: null,
+            countdownValue: 0,
+            programConfig: {
+                'count-up': { maxTime: 300 },
+                'count-down': { initialTime: 300 },
+                'amrap': { duration: 300 },
+                'emom': { totalMinutes: 10, reps: 10 },
+                'hiit': { 
+                    warmup: 5,
+                    work: 20,
+                    rest: 10,
+                    rounds: 8,
+                    cooldown: 5,
+                    direction: 'down'
+                },
+                'tabata': { rounds: 8, work: 20, rest: 10 },
+                'for-time': { maxTime: 600 }
+            },
+            customPrograms: [],
+            elements: {
+                display: null,
+                concentrationDisplay: null,
+                actionBtn: null,
+                resetBtn: null,
+                concentrationActionBtn: null,
+                concentrationResetBtn: null,
+                programBtns: null,
+                globalConfigBtn: null,
+                editCorner: null,
+                configModal: null,
+                createProgramModal: null,
+                themeSwitcher: null,
+                customProgramBtn: null,
+                fullscreenBtn: null,
+                concentrationMode: null,
+                minimizeBtn: null,
+                programsContainer: null,
+                glowEffectToggle: null,
+                ledIntensity: null,
+                autoFullscreenToggle: null,
+                defaultCountdownSelect: null,
+                countdownOverlay: null,
+                countdownNumber: null,
+                countdownText: null
+            }
+        };
+
+        // Inicializar elementos
+        function initElements() {
+            const els = state.elements;
+            els.display = new SevenSegmentDisplay('display');
+            els.concentrationDisplay = new SevenSegmentDisplay('concentration-display', true);
+            els.actionBtn = document.getElementById('action-btn');
+            els.resetBtn = document.getElementById('reset-btn');
+            els.concentrationActionBtn = document.getElementById('concentration-action-btn');
+            els.concentrationResetBtn = document.getElementById('concentration-reset-btn');
+            els.programBtns = document.querySelectorAll('.program-btn');
+            els.globalConfigBtn = document.getElementById('global-config-btn');
+            els.editCorner = document.getElementById('edit-corner');
+            els.configModal = document.getElementById('config-modal');
+            els.createProgramModal = document.getElementById('create-program-modal');
+            els.themeSwitcher = document.getElementById('themeSwitcher');
+            els.customProgramBtn = document.querySelector('.program-btn.custom');
+            els.fullscreenBtn = document.getElementById('fullscreen-btn');
+            els.concentrationMode = document.getElementById('concentration-mode');
+            els.minimizeBtn = document.getElementById('minimize-btn');
+            els.programsContainer = document.getElementById('programs-container');
+            els.glowEffectToggle = document.getElementById('glow-effect-toggle');
+            els.ledIntensity = document.getElementById('led-intensity');
+            els.autoFullscreenToggle = document.getElementById('auto-fullscreen-toggle');
+            els.defaultCountdownSelect = document.getElementById('default-countdown');
+            els.countdownOverlay = document.getElementById('countdown-overlay');
+            els.countdownNumber = document.getElementById('countdown-number');
+            els.countdownText = document.getElementById('countdown-text');
+        }
+
+        // Funciones de utilidad
+        const utils = {
+            timeToSeconds(timeStr) {
+                const [mins, secs] = timeStr.split(':').map(Number);
+                return (mins * 60) + secs;
+            },
+            
+            secondsToTime(seconds) {
+                const mins = Math.floor(seconds / 60);
+                const secs = seconds % 60;
+                return `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+            },
+            
+            formatTimeInput(input) {
+                let v = input.value.replace(/\D/g, "").substring(0, 4);
+                if (v.length > 2) v = v.substring(0, 2) + ":" + v.substring(2);
+                input.value = v;
+            },
+            
+            formatStopwatchTime(centiseconds) {
+                const minutes = Math.floor(centiseconds / 6000);
+                const remaining = centiseconds % 6000;
+                const seconds = Math.floor(remaining / 100);
+                const cents = remaining % 100;
+                
+                return `  ${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}:${String(cents).padStart(2, '0')}`;
+            }
+        };
+
+        // Lógica de cuenta regresiva
+        const countdownLogic = {
+            startCountdown(duration, callback) {
+                state.countdownValue = duration;
+                state.countdownActive = true;
+                state.elements.countdownNumber.textContent = duration;
+                state.elements.countdownText.textContent = '¡Listo para empezar!';
+                state.elements.countdownOverlay.style.display = 'flex';
+                
+                state.countdownInterval = setInterval(() => {
+                    state.countdownValue--;
+                    
+                    if (state.countdownValue > 0) {
+                        state.elements.countdownNumber.textContent = state.countdownValue;
+                    } else {
+                        clearInterval(state.countdownInterval);
+                        state.elements.countdownOverlay.style.display = 'none';
+                        state.countdownActive = false;
+                        callback();
+                    }
+                }, 1000);
+            },
+            
+            cancelCountdown() {
+                if (state.countdownActive) {
+                    clearInterval(state.countdownInterval);
+                    state.elements.countdownOverlay.style.display = 'none';
+                    state.countdownActive = false;
+                }
+            }
+        };
+
+        // Lógica del temporizador
+        const timerLogic = {
+            updateClock() {
                 const now = new Date();
                 const hours = String(now.getHours()).padStart(2, '0');
                 const minutes = String(now.getMinutes()).padStart(2, '0');
                 const seconds = String(now.getSeconds()).padStart(2, '0');
-                updateDisplay(`${hours}:${minutes}:${seconds}`);
-            }
-        }
-        
-        function updateStopwatch() {
-            const minutes = Math.floor(stopwatchCentiseconds / 6000);
-            const remaining = stopwatchCentiseconds % 6000;
-            const seconds = Math.floor(remaining / 100);
-            const cents = remaining % 100;
+                state.elements.display.updateDisplay(`${hours}:${minutes}:${seconds}`);
+                state.elements.concentrationDisplay.updateDisplay(`${hours}:${minutes}:${seconds}`);
+            },
             
-            const mins = String(minutes).padStart(2, '0');
-            const secs = String(seconds).padStart(2, '0');
-            const centsStr = String(cents).padStart(2, '0');
+            updateStopwatch() {
+                state.elements.display.updateDisplay(utils.formatStopwatchTime(state.stopwatchCentiseconds));
+                state.elements.concentrationDisplay.updateDisplay(utils.formatStopwatchTime(state.stopwatchCentiseconds));
+            },
             
-            updateDisplay(`  ${mins}:${secs}:${centsStr}`);
-        }
-        
-        function updateTimerDisplay() {
-            if (activeProgram === 'clock') return;
-            
-            let timeStr;
-            if (activeProgram === 'stopwatch') {
-                updateStopwatch();
-                return;
-            } else if (countDirection === 'down') {
-                const mins = Math.floor(timerValue / 60);
-                const secs = timerValue % 60;
-                timeStr = `  ${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}:00`;
-            } else {
-                // Contador ascendente
-                const mins = Math.floor(timerValue / 60);
-                const secs = timerValue % 60;
-                timeStr = `  ${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}:00`;
-            }
-            
-            updateDisplay(timeStr);
-        }
-        
-        function startTimer() {
-            if (isTimerRunning) return;
-            
-            isTimerRunning = true;
-            actionBtn.textContent = 'Pausar';
-            concentrationActionBtn.innerHTML = '<i class="fas fa-pause"></i>';
-            
-            // Deshabilitar otros programas mientras el timer está activo
-            document.querySelectorAll('.program-btn').forEach(btn => {
-                if (btn.dataset.program !== activeProgram) {
-                    btn.style.pointerEvents = 'none';
-                    btn.style.opacity = '0.6';
-                } else {
-                    btn.classList.add('running');
-                }
-            });
-            
-            if (activeProgram === 'stopwatch') {
-                // Usar centésimos para el cronómetro
-                stopwatchCentiseconds = 0;
-                stopwatchInterval = setInterval(() => {
-                    stopwatchCentiseconds++;
-                    updateStopwatch();
-                }, 10);
-            } else {
-                timerInterval = setInterval(() => {
-                    if (countDirection === 'down') {
-                        if (timerValue <= 0) {
-                            clearInterval(timerInterval);
-                            isTimerRunning = false;
-                            actionBtn.textContent = 'Iniciar';
-                            concentrationActionBtn.innerHTML = '<i class="fas fa-play"></i>';
-                            return;
-                        }
-                        timerValue--;
-                    } else {
-                        timerValue++;
-                    }
-                    
-                    updateTimerDisplay();
-                }, 1000);
-            }
-        }
-        
-        function pauseTimer() {
-            if (activeProgram === 'stopwatch') {
-                clearInterval(stopwatchInterval);
-            } else {
-                clearInterval(timerInterval);
-            }
-            
-            isTimerRunning = false;
-            actionBtn.textContent = 'Iniciar';
-            concentrationActionBtn.innerHTML = '<i class="fas fa-play"></i>';
-            
-            // Habilitar todos los programas
-            document.querySelectorAll('.program-btn').forEach(btn => {
-                btn.style.pointerEvents = 'auto';
-                btn.style.opacity = '1';
-                btn.classList.remove('running');
-            });
-        }
-        
-        function toggleTimer() {
-            if (isTimerRunning) {
-                pauseTimer();
-            } else {
-                startTimer();
-            }
-        }
-        
-        // Convertir mm:ss a segundos
-        function timeToSeconds(timeStr) {
-            const [mins, secs] = timeStr.split(':').map(Number);
-            return (mins * 60) + secs;
-        }
-        
-        // Convertir segundos a mm:ss
-        function secondsToTime(seconds) {
-            const mins = Math.floor(seconds / 60);
-            const secs = seconds % 60;
-            return `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
-        }
-        
-        function setProgram(program) {
-            activeProgram = program;
-            
-            programBtns.forEach(btn => {
-                const isActive = btn.dataset.program === program;
-                btn.classList.toggle('active', isActive);
-                btn.classList.toggle('bg-base-200', !isActive);
-            });
-            
-            if (isTimerRunning) {
-                pauseTimer();
-            }
-            
-            switch(program) {
-                case 'clock':
-                    actionBtn.textContent = isConnected ? 'Desconectar dispositivo' : 'Enviar al dispositivo';
-                    updateClock();
-                    break;
-                case 'stopwatch':
-                    countDirection = 'up';
-                    timerValue = 0;
-                    stopwatchCentiseconds = 0;
-                    actionBtn.textContent = 'Iniciar';
-                    updateStopwatch();
-                    break;
-                case 'count-up':
-                    countDirection = 'up';
-                    timerValue = 0;
-                    actionBtn.textContent = 'Iniciar';
-                    updateTimerDisplay();
-                    break;
-                case 'count-down':
-                    countDirection = 'down';
-                    timerValue = programConfig['count-down'].initialTime;
-                    actionBtn.textContent = 'Iniciar';
-                    updateTimerDisplay();
-                    break;
-                case 'for-time':
-                    countDirection = 'up';
-                    timerValue = 0;
-                    actionBtn.textContent = 'Iniciar';
-                    updateTimerDisplay();
-                    break;
-                case 'amrap':
-                    countDirection = 'down';
-                    timerValue = programConfig['amrap'].duration;
-                    actionBtn.textContent = 'Iniciar';
-                    updateTimerDisplay();
-                    break;
-                case 'emom':
-                    countDirection = 'down';
-                    timerValue = programConfig['emom'].totalMinutes * 60;
-                    actionBtn.textContent = 'Iniciar';
-                    updateTimerDisplay();
-                    break;
-                case 'hiit':
-                    countDirection = programConfig['hiit'].direction;
-                    timerValue = programConfig['hiit'].warmup * 60;
-                    actionBtn.textContent = 'Iniciar';
-                    updateTimerDisplay();
-                    break;
-                case 'tabata':
-                    countDirection = 'down';
-                    timerValue = programConfig['tabata'].work;
-                    actionBtn.textContent = 'Iniciar';
-                    updateTimerDisplay();
-                    break;
-                default:
-                    if (program.startsWith('custom-')) {
-                        const customId = program.split('-')[1];
-                        const customProgram = customPrograms.find(p => p.id === customId);
-                        if (customProgram) {
-                            countDirection = customProgram.direction || 'down';
-                            timerValue = customProgram.initialTime || 300;
-                            actionBtn.textContent = 'Iniciar';
-                            updateTimerDisplay();
-                        }
-                    } else {
-                        timerValue = 600;
-                        countDirection = 'down';
-                        actionBtn.textContent = 'Iniciar';
-                        updateTimerDisplay();
-                    }
-            }
-        }
-        
-        function toggleEditMode() {
-            editMode = !editMode;
-            document.body.classList.toggle('edit-mode', editMode);
-            
-            const editIcon = editCorner.querySelector('i');
-            if (editMode) {
-                editIcon.className = 'fas fa-check';
-                customProgramBtn.classList.remove('hidden');
-                // Mostrar botones de eliminar en programas personalizados
-                document.querySelectorAll('.delete-custom').forEach(btn => {
-                    btn.style.display = 'flex';
-                });
-            } else {
-                editIcon.className = 'fas fa-pencil-alt';
-                customProgramBtn.classList.add('hidden');
-                // Ocultar botones de eliminar en programas personalizados
-                document.querySelectorAll('.delete-custom').forEach(btn => {
-                    btn.style.display = 'none';
-                });
-            }
-        }
-        
-        // Inicializar modales de configuración
-        function initProgramModals() {
-            // Programas con modal de configuración
-            const configurablePrograms = ['count-up', 'count-down', 'amrap', 'emom', 'hiit', 'tabata'];
-            
-            configurablePrograms.forEach(program => {
-                document.querySelector(`[data-program="${program}"]`).addEventListener('click', () => {
-                    if (editMode) {
-                        // Abrir modal de configuración específico
-                        switch(program) {
-                            case 'count-up':
-                                document.getElementById('count-up-max').value = 
-                                    secondsToTime(programConfig['count-up'].maxTime);
-                                countUpModal.showModal();
-                                break;
-                            case 'count-down':
-                                document.getElementById('count-down-init').value = 
-                                    secondsToTime(programConfig['count-down'].initialTime);
-                                countDownModal.showModal();
-                                break;
-                            case 'amrap':
-                                document.getElementById('amrap-duration').value = 
-                                    secondsToTime(programConfig['amrap'].duration);
-                                amrapModal.showModal();
-                                break;
-                            case 'emom':
-                                document.getElementById('emom-total').value = programConfig['emom'].totalMinutes;
-                                document.getElementById('emom-reps').value = programConfig['emom'].reps;
-                                emomModal.showModal();
-                                break;
-                            case 'hiit':
-                                document.getElementById('hiit-warmup').value = programConfig['hiit'].warmup;
-                                document.getElementById('hiit-work').value = programConfig['hiit'].work;
-                                document.getElementById('hiit-rest').value = programConfig['hiit'].rest;
-                                document.getElementById('hiit-rounds').value = programConfig['hiit'].rounds;
-                                document.getElementById('hiit-cooldown').value = programConfig['hiit'].cooldown;
-                                document.querySelector(`#hiit-${programConfig['hiit'].direction}`).checked = true;
-                                hiitModal.showModal();
-                                break;
-                            case 'tabata':
-                                document.getElementById('tabata-rounds').value = programConfig['tabata'].rounds;
-                                document.getElementById('tabata-work').value = programConfig['tabata'].work;
-                                document.getElementById('tabata-rest').value = programConfig['tabata'].rest;
-                                tabataModal.showModal();
-                                break;
-                        }
-                    } else {
-                        // No estamos en modo edición, seleccionar el programa
-                        setProgram(program);
-                    }
-                });
-            });
-            
-            // Programas sin configuración
-            ['clock', 'stopwatch', 'for-time'].forEach(program => {
-                document.querySelector(`[data-program="${program}"]`).addEventListener('click', () => {
-                    if (editMode) {
-                        // En modo edición, no hacemos nada para estos programas
-                        return;
-                    }
-                    setProgram(program);
-                });
-            });
-            
-            // Botón de creación de programas personalizados
-            customProgramBtn.addEventListener('click', () => {
-                if (editMode) {
-                    createProgramModal.showModal();
-                }
-            });
-            
-            // Aplicar cambios en los modales
-            document.getElementById('apply-count-up').addEventListener('click', () => {
-                programConfig['count-up'].maxTime = timeToSeconds(
-                    document.getElementById('count-up-max').value
-                );
-                setProgram('count-up');
-                countUpModal.close();
-            });
-            
-            document.getElementById('apply-count-down').addEventListener('click', () => {
-                programConfig['count-down'].initialTime = timeToSeconds(
-                    document.getElementById('count-down-init').value
-                );
-                setProgram('count-down');
-                countDownModal.close();
-            });
-            
-            document.getElementById('apply-amrap').addEventListener('click', () => {
-                programConfig['amrap'].duration = timeToSeconds(
-                    document.getElementById('amrap-duration').value
-                );
-                setProgram('amrap');
-                amrapModal.close();
-            });
-            
-            document.getElementById('apply-emom').addEventListener('click', () => {
-                programConfig['emom'].totalMinutes = parseInt(document.getElementById('emom-total').value);
-                programConfig['emom'].reps = parseInt(document.getElementById('emom-reps').value);
-                setProgram('emom');
-                emomModal.close();
-            });
-            
-            document.getElementById('apply-hiit').addEventListener('click', () => {
-                programConfig['hiit'].warmup = parseInt(document.getElementById('hiit-warmup').value);
-                programConfig['hiit'].work = parseInt(document.getElementById('hiit-work').value);
-                programConfig['hiit'].rest = parseInt(document.getElementById('hiit-rest').value);
-                programConfig['hiit'].rounds = parseInt(document.getElementById('hiit-rounds').value);
-                programConfig['hiit'].cooldown = parseInt(document.getElementById('hiit-cooldown').value);
-                programConfig['hiit'].direction = 
-                    document.querySelector('input[name="hiit-direction"]:checked').value;
-                setProgram('hiit');
-                hiitModal.close();
-            });
-            
-            document.getElementById('apply-tabata').addEventListener('click', () => {
-                programConfig['tabata'].rounds = parseInt(document.getElementById('tabata-rounds').value);
-                programConfig['tabata'].work = parseInt(document.getElementById('tabata-work').value);
-                programConfig['tabata'].rest = parseInt(document.getElementById('tabata-rest').value);
-                setProgram('tabata');
-                tabataModal.close();
-            });
-        }
-        
-        // Crear tarjeta de programa personalizado
-        function createCustomProgramCard(program) {
-            const card = document.createElement('div');
-            card.className = 'program-btn aspect-square bg-base-200 rounded-xl p-2 text-center cursor-pointer transition-all custom-program-card';
-            card.dataset.program = `custom-${program.id}`;
-            
-            const title = document.createElement('div');
-            title.className = 'btn-text';
-            title.textContent = program.name;
-            
-            const info = document.createElement('div');
-            info.className = 'program-info';
-            info.textContent = program.description || 'Programa personalizado';
-            
-            const deleteBtn = document.createElement('div');
-            deleteBtn.className = 'delete-custom';
-            deleteBtn.innerHTML = '×';
-            deleteBtn.addEventListener('click', (e) => {
-                e.stopPropagation();
-                deleteCustomProgram(program.id);
-            });
-            
-            card.appendChild(title);
-            card.appendChild(info);
-            card.appendChild(deleteBtn);
-            
-            // Insertar antes del botón de crear
-            programsContainer.insertBefore(card, customProgramBtn);
-            
-            // Evento para seleccionar el programa
-            card.addEventListener('click', () => {
-                if (editMode) {
-                    // En modo edición, no hacemos nada (solo se puede eliminar)
+            updateTimerDisplay() {
+                if (state.activeProgram === 'clock') return;
+                
+                if (state.activeProgram === 'stopwatch') {
+                    this.updateStopwatch();
                     return;
                 }
-                setProgram(`custom-${program.id}`);
-            });
-        }
-        
-        // Eliminar programa personalizado
-        function deleteCustomProgram(id) {
-            customPrograms = customPrograms.filter(p => p.id !== id);
-            document.querySelector(`[data-program="custom-${id}"]`).remove();
-            saveCustomPrograms();
-        }
-        
-        // Guardar programas personalizados
-        function saveCustomPrograms() {
-            localStorage.setItem('customPrograms', JSON.stringify(customPrograms));
-        }
-        
-        // Cargar programas personalizados
-        function loadCustomPrograms() {
-            const saved = localStorage.getItem('customPrograms');
-            if (saved) {
-                customPrograms = JSON.parse(saved);
-                customPrograms.forEach(createCustomProgramCard);
+                
+                const mins = Math.floor(state.timerValue / 60);
+                const secs = state.timerValue % 60;
+                const timeStr = `  ${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}:00`;
+                
+                state.elements.display.updateDisplay(timeStr);
+                state.elements.concentrationDisplay.updateDisplay(timeStr);
+            },
+            
+            startTimer() {
+                if (state.isTimerRunning) return;
+                
+                // Verificar si se necesita una cuenta regresiva
+                let countdownDuration = 0;
+                const currentProgram = state.activeProgram;
+                
+                if (currentProgram === 'clock') {
+                    // No se aplica cuenta regresiva al reloj
+                    this._startTimerInternal();
+                    return;
+                }
+                
+                // Buscar en programas personalizados
+                if (currentProgram.startsWith('custom-')) {
+                    const customId = currentProgram.split('-')[1];
+                    const customProgram = state.customPrograms.find(p => p.id === customId);
+                    if (customProgram && customProgram.countdown && customProgram.countdown > 0) {
+                        countdownDuration = parseInt(customProgram.countdown);
+                    }
+                } 
+                // Para programas predefinidos
+                else if (state.programConfig[currentProgram] && 
+                         state.programConfig[currentProgram].hasOwnProperty('countdown') && 
+                         state.programConfig[currentProgram].countdown > 0) {
+                    countdownDuration = state.programConfig[currentProgram].countdown;
+                }
+                // Si no tiene cuenta regresiva propia, usar la por defecto
+                else {
+                    countdownDuration = state.defaultCountdown;
+                }
+                
+                // Iniciar cuenta regresiva si es necesario
+                if (countdownDuration > 0) {
+                    countdownLogic.startCountdown(countdownDuration, () => {
+                        this._startTimerInternal();
+                    });
+                } else {
+                    this._startTimerInternal();
+                }
+            },
+            
+            _startTimerInternal() {
+                state.isTimerRunning = true;
+                state.elements.actionBtn.textContent = 'Pausar';
+                state.elements.concentrationActionBtn.innerHTML = '<i class="fas fa-pause"></i>';
+                
+                // Activar modo concentración para programas de temporizador
+                if (state.autoFullscreen && state.activeProgram !== 'clock') {
+                    state.isFullscreen = true;
+                    state.elements.concentrationMode.classList.remove('hidden');
+                }
+                
+                // Deshabilitar otros programas
+                state.elements.programBtns.forEach(btn => {
+                    if (btn.dataset.program !== state.activeProgram) {
+                        btn.style.pointerEvents = 'none';
+                        btn.style.opacity = '0.6';
+                    } else {
+                        btn.classList.add('running');
+                    }
+                });
+                
+                if (state.activeProgram === 'stopwatch') {
+                    state.stopwatchCentiseconds = 0;
+                    state.stopwatchInterval = setInterval(() => {
+                        state.stopwatchCentiseconds++;
+                        this.updateStopwatch();
+                    }, 10); // Intervalo de 10ms para centésimas
+                } else {
+                    state.timerInterval = setInterval(() => {
+                        if (state.countDirection === 'down') {
+                            if (state.timerValue <= 0) {
+                                this.pauseTimer();
+                                return;
+                            }
+                            state.timerValue--;
+                        } else {
+                            state.timerValue++;
+                        }
+                        this.updateTimerDisplay();
+                    }, 1000);
+                }
+            },
+            
+            pauseTimer() {
+                if (state.activeProgram === 'stopwatch') {
+                    clearInterval(state.stopwatchInterval);
+                } else {
+                    clearInterval(state.timerInterval);
+                }
+                
+                state.isTimerRunning = false;
+                state.elements.actionBtn.textContent = 'Iniciar';
+                state.elements.concentrationActionBtn.innerHTML = '<i class="fas fa-play"></i>';
+                
+                // Habilitar programas
+                state.elements.programBtns.forEach(btn => {
+                    btn.style.pointerEvents = 'auto';
+                    btn.style.opacity = '1';
+                    btn.classList.remove('running');
+                });
+            },
+            
+            resetTimer() {
+                if (state.isTimerRunning) {
+                    this.pauseTimer();
+                }
+                
+                // Resetear según el programa activo
+                switch(state.activeProgram) {
+                    case 'clock':
+                        // El reloj no se resetea, solo actualizamos
+                        this.updateClock();
+                        break;
+                    case 'stopwatch':
+                        state.stopwatchCentiseconds = 0;
+                        this.updateStopwatch();
+                        break;
+                    case 'count-up':
+                        state.timerValue = 0;
+                        this.updateTimerDisplay();
+                        break;
+                    case 'count-down':
+                        state.timerValue = state.programConfig['count-down'].initialTime;
+                        this.updateTimerDisplay();
+                        break;
+                    case 'for-time':
+                        state.timerValue = 0;
+                        this.updateTimerDisplay();
+                        break;
+                    case 'amrap':
+                        state.timerValue = state.programConfig['amrap'].duration;
+                        this.updateTimerDisplay();
+                        break;
+                    case 'emom':
+                        state.timerValue = state.programConfig['emom'].totalMinutes * 60;
+                        this.updateTimerDisplay();
+                        break;
+                    case 'hiit':
+                        state.timerValue = state.programConfig['hiit'].warmup * 60;
+                        this.updateTimerDisplay();
+                        break;
+                    case 'tabata':
+                        state.timerValue = state.programConfig['tabata'].work;
+                        this.updateTimerDisplay();
+                        break;
+                    default:
+                        if (state.activeProgram.startsWith('custom-')) {
+                            const customId = state.activeProgram.split('-')[1];
+                            const customProgram = state.customPrograms.find(p => p.id === customId);
+                            if (customProgram) {
+                                state.timerValue = customProgram.initialTime || 300;
+                                this.updateTimerDisplay();
+                            }
+                        }
+                }
             }
-        }
-        
-        // Inicializar el modal de creación de programas personalizados
+        };
+
+        // Lógica de programas
+        const programLogic = {
+            setProgram(program) {
+                state.activeProgram = program;
+                
+                // Actualizar clases de botones
+                state.elements.programBtns.forEach(btn => {
+                    btn.classList.toggle('active', btn.dataset.program === program);
+                    btn.classList.toggle('bg-base-200', btn.dataset.program !== program);
+                });
+                
+                if (state.isTimerRunning) {
+                    timerLogic.pauseTimer();
+                }
+                
+                switch(program) {
+                    case 'clock':
+                        state.elements.actionBtn.textContent = state.isConnected ? 'Desconectar dispositivo' : 'Enviar al dispositivo';
+                        timerLogic.updateClock();
+                        break;
+                    case 'stopwatch':
+                        this.setupStopwatch();
+                        break;
+                    case 'count-up':
+                        this.setupCountUp();
+                        break;
+                    case 'count-down':
+                        this.setupCountDown();
+                        break;
+                    case 'for-time':
+                        this.setupForTime();
+                        break;
+                    case 'amrap':
+                        this.setupAmrap();
+                        break;
+                    case 'emom':
+                        this.setupEmom();
+                        break;
+                    case 'hiit':
+                        this.setupHiit();
+                        break;
+                    case 'tabata':
+                        this.setupTabata();
+                        break;
+                    default:
+                        if (program.startsWith('custom-')) {
+                            this.setupCustomProgram(program);
+                        }
+                }
+            },
+            
+            setupStopwatch() {
+                state.countDirection = 'up';
+                state.timerValue = 0;
+                state.stopwatchCentiseconds = 0;
+                state.elements.actionBtn.textContent = 'Iniciar';
+                timerLogic.updateStopwatch();
+            },
+            
+            setupCountUp() {
+                state.countDirection = 'up';
+                state.timerValue = 0;
+                state.elements.actionBtn.textContent = 'Iniciar';
+                timerLogic.updateTimerDisplay();
+            },
+            
+            setupCountDown() {
+                state.countDirection = 'down';
+                state.timerValue = state.programConfig['count-down'].initialTime;
+                state.elements.actionBtn.textContent = 'Iniciar';
+                timerLogic.updateTimerDisplay();
+            },
+            
+            setupForTime() {
+                state.countDirection = 'up';
+                state.timerValue = 0;
+                state.elements.actionBtn.textContent = 'Iniciar';
+                timerLogic.updateTimerDisplay();
+            },
+            
+            setupAmrap() {
+                state.countDirection = 'down';
+                state.timerValue = state.programConfig['amrap'].duration;
+                state.elements.actionBtn.textContent = 'Iniciar';
+                timerLogic.updateTimerDisplay();
+            },
+            
+            setupEmom() {
+                state.countDirection = 'down';
+                state.timerValue = state.programConfig['emom'].totalMinutes * 60;
+                state.elements.actionBtn.textContent = 'Iniciar';
+                timerLogic.updateTimerDisplay();
+            },
+            
+            setupHiit() {
+                state.countDirection = state.programConfig['hiit'].direction;
+                state.timerValue = state.programConfig['hiit'].warmup * 60;
+                state.elements.actionBtn.textContent = 'Iniciar';
+                timerLogic.updateTimerDisplay();
+            },
+            
+            setupTabata() {
+                state.countDirection = 'down';
+                state.timerValue = state.programConfig['tabata'].work;
+                state.elements.actionBtn.textContent = 'Iniciar';
+                timerLogic.updateTimerDisplay();
+            },
+            
+            setupCustomProgram(program) {
+                const customId = program.split('-')[1];
+                const customProgram = state.customPrograms.find(p => p.id === customId);
+                if (customProgram) {
+                    state.countDirection = customProgram.direction || 'down';
+                    state.timerValue = customProgram.initialTime || 300;
+                    state.elements.actionBtn.textContent = 'Iniciar';
+                    timerLogic.updateTimerDisplay();
+                }
+            }
+        };
+
+        // Gestión de programas personalizados
+        const customPrograms = {
+            createCustomProgramCard(program) {
+                const card = document.createElement('div');
+                card.className = 'program-btn aspect-square bg-base-200 rounded-xl p-2 text-center cursor-pointer transition-all custom-program-card';
+                card.dataset.program = `custom-${program.id}`;
+                
+                const title = document.createElement('div');
+                title.className = 'btn-text';
+                title.textContent = program.name;
+                
+                const info = document.createElement('div');
+                info.className = 'program-info';
+                info.textContent = program.description || 'Programa personalizado';
+                
+                const deleteBtn = document.createElement('div');
+                deleteBtn.className = 'delete-custom';
+                deleteBtn.innerHTML = '×';
+                deleteBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    this.deleteCustomProgram(program.id);
+                });
+                
+                card.appendChild(title);
+                card.appendChild(info);
+                card.appendChild(deleteBtn);
+                state.elements.programsContainer.insertBefore(card, state.elements.customProgramBtn);
+                
+                // Evento para seleccionar el programa
+                card.addEventListener('click', () => {
+                    if (state.editMode) return;
+                    programLogic.setProgram(`custom-${program.id}`);
+                });
+            },
+            
+            deleteCustomProgram(id) {
+                state.customPrograms = state.customPrograms.filter(p => p.id !== id);
+                document.querySelector(`[data-program="custom-${id}"]`).remove();
+                this.saveCustomPrograms();
+            },
+            
+            saveCustomPrograms() {
+                localStorage.setItem('customPrograms', JSON.stringify(state.customPrograms));
+            },
+            
+            loadCustomPrograms() {
+                const saved = localStorage.getItem('customPrograms');
+                if (saved) {
+                    state.customPrograms = JSON.parse(saved);
+                    state.customPrograms.forEach(p => this.createCustomProgramCard(p));
+                }
+            }
+        };
+
+        // Inicialización del modal de creación de programas
         function initProgramCreationModal() {
             const blockList = document.getElementById('blockList');
-            const $ = (id) => document.getElementById(id);
-            
-            const formatTimeInput = (input) => {
-                let v = input.value.replace(/\D/g, "").substring(0, 4);
-                if (v.length > 2) v = v.substring(0, 2) + ":" + v.substring(2);
-                input.value = v;
-            };
             
             const createSubBlock = (data = {}) => {
                 const template = document.getElementById('sub-block-template');
@@ -1502,15 +1598,11 @@
                 if (data.name) title.textContent = data.name;
                 if (data.userEditedName) title.dataset.userEdited = "true";
                 clone.querySelector('[data-field="time"]').value = data.time || "";
-                clone.querySelector('[data-field="warning"]').value =
-                    data.warning || "";
+                clone.querySelector('[data-field="warning"]').value = data.warning || "";
                 const direction = data.direction || "up";
                 clone.querySelector('[data-field="direction"]').value = direction;
-                const dirButton = clone.querySelector(
-                    `[data-action="set-direction"][data-value="${direction}"]`
-                );
-                if (dirButton)
-                    dirButton.classList.add("bg-primary", "text-primary-content");
+                const dirButton = clone.querySelector(`[data-action="set-direction"][data-value="${direction}"]`);
+                if (dirButton) dirButton.classList.add("bg-primary", "text-primary-content");
                 return clone;
             };
             
@@ -1519,47 +1611,66 @@
                 const clone = template.content.cloneNode(true);
                 const title = clone.querySelector('[data-action="edit-title"]');
                 const select = clone.querySelector('[data-field="repeat"]');
-                let repeatOptions =
-                    '<option value="1">No repetir este bloque</option>';
-                for (let i = 2; i <= 99; i++)
-                    repeatOptions += `<option value="${i}">Repetir ${i} veces</option>`;
+                
+                let repeatOptions = '<option value="1">No repetir este bloque</option>';
+                for (let i = 2; i <= 99; i++) repeatOptions += `<option value="${i}">Repetir ${i} veces</option>`;
                 select.innerHTML = repeatOptions;
+                
                 if (data.name) title.textContent = data.name;
                 if (data.userEditedName) title.dataset.userEdited = "true";
                 select.value = data.repeat || 1;
-                const subBlockContainer = clone.querySelector(
-                    ".sub-block-list-container"
-                );
+                
+                const subBlockContainer = clone.querySelector(".sub-block-list-container");
                 if (data.blocks && data.blocks.length > 0) {
-                    data.blocks.forEach((subBlockData) =>
-                        subBlockContainer.appendChild(createSubBlock(subBlockData))
-                    );
+                    data.blocks.forEach(subBlockData => subBlockContainer.appendChild(createSubBlock(subBlockData)));
                 } else {
                     subBlockContainer.appendChild(createSubBlock());
                 }
+                
                 return clone;
+            };
+            
+            // Renumerar bloques para mantener el orden
+            const renumberBlocks = () => {
+                let mainBlockCount = 0;
+                blockList.querySelectorAll(":scope > .main-block").forEach(mainBlock => {
+                    mainBlockCount++;
+                    const title = mainBlock.querySelector('[data-action="edit-title"]');
+                    if (!title.dataset.userEdited) {
+                        title.textContent = `Bloque ${mainBlockCount}`;
+                    }
+                    
+                    let subBlockCount = 0;
+                    mainBlock.querySelectorAll(".sub-block-list-container > .block-item").forEach(subBlock => {
+                        subBlockCount++;
+                        const subTitle = subBlock.querySelector('[data-action="edit-title"]');
+                        if (!subTitle.dataset.userEdited) {
+                            subTitle.textContent = `Sub Bloque ${subBlockCount}`;
+                        }
+                    });
+                });
             };
             
             blockList.addEventListener("click", (e) => {
                 const button = e.target.closest("[data-action]");
                 if (!button) return;
+                
                 const action = button.dataset.action;
                 const block = button.closest(".main-block, .block-item");
+                
                 switch (action) {
                     case "delete-block":
                         block.remove();
+                        renumberBlocks();
                         break;
                     case "toggle-content":
                         const content = block.querySelector(".content");
                         content.classList.toggle("hidden");
-                        button.innerHTML = content.classList.contains("hidden")
-                            ? "▼"
-                            : "▲";
+                        button.innerHTML = content.classList.contains("hidden") ? "▼" : "▲";
                         break;
                     case "add-sub-block":
-                        block
-                            .querySelector(".sub-block-list-container")
-                            .appendChild(createSubBlock());
+                        block.querySelector(".sub-block-list-container").appendChild(createSubBlock());
+                        renumberBlocks();
                         break;
                     case "edit-title":
                         if (button.querySelector("input")) return;
@@ -1576,165 +1687,361 @@
                             } else {
                                 delete button.dataset.userEdited;
                             }
+                            renumberBlocks();
                         });
-                        input.addEventListener(
-                            "keydown",
-                            (e) => e.key === "Enter" && e.target.blur()
-                        );
+                        input.addEventListener("keydown", (e) => e.key === "Enter" && e.target.blur());
                         button.innerHTML = "";
                         button.appendChild(input);
                         input.focus();
                         break;
                     case "set-direction":
                         const parent = button.parentElement;
-                        parent
-                            .querySelectorAll("button")
-                            .forEach((btn) =>
-                                btn.classList.remove("bg-primary", "text-primary-content")
-                            );
+                        parent.querySelectorAll("button").forEach(btn => 
+                            btn.classList.remove("bg-primary", "text-primary-content")
+                        );
                         button.classList.add("bg-primary", "text-primary-content");
-                        parent.querySelector('input[data-field="direction"]').value =
-                            button.dataset.value;
+                        parent.querySelector('input[data-field="direction"]').value = button.dataset.value;
                         break;
                 }
             });
             
             blockList.addEventListener("focusin", (e) => {
-                if (
-                    e.target.matches('[data-field="time"], [data-field="warning"]') &&
-                    !e.target.value
-                ) {
+                if (e.target.matches('[data-field="time"], [data-field="warning"]') && !e.target.value) {
                     e.target.value = "00:00";
                 }
             });
             
             blockList.addEventListener("input", (e) => {
                 if (e.target.matches('[data-field="time"], [data-field="warning"]')) {
-                    formatTimeInput(e.target);
+                    utils.formatTimeInput(e.target);
                 }
             });
             
-            $("addMainBlockBtn").addEventListener("click", () => {
+            document.getElementById('addMainBlockBtn').addEventListener("click", () => {
                 blockList.appendChild(createMainBlock());
+                renumberBlocks();
             });
             
-            $("cancelCreate").addEventListener("click", () => createProgramModal.close());
+            document.getElementById('cancelCreate').addEventListener("click", () => {
+                state.elements.createProgramModal.close();
+            });
+            
+            document.getElementById('programForm').addEventListener('submit', (e) => {
+                e.preventDefault();
+                const programName = document.getElementById('program-name').value;
+                const programId = 'custom-' + Date.now();
+                const newProgram = {
+                    id: programId,
+                    name: programName,
+                    description: document.getElementById('program-description').value,
+                    countdown: document.getElementById('countdown').value,
+                    initialTime: 300,
+                    direction: 'down'
+                };
+                
+                state.customPrograms.push(newProgram);
+                customPrograms.createCustomProgramCard(newProgram);
+                customPrograms.saveCustomPrograms();
+                state.elements.createProgramModal.close();
+                document.getElementById('programForm').reset();
+                blockList.innerHTML = '';
+            });
         }
-        
-        // Eventos
-        actionBtn.addEventListener('click', () => {
-            if (activeProgram === 'clock') {
-                if (isConnected) {
-                    isConnected = false;
-                    actionBtn.textContent = 'Enviar al dispositivo';
-                } else {
-                    isConnected = true;
-                    actionBtn.textContent = 'Desconectar dispositivo';
+
+        // Configuración de eventos
+        function setupEventListeners() {
+            // Botón de acción principal
+            state.elements.actionBtn.addEventListener('click', () => {
+                if (state.countdownActive) {
+                    countdownLogic.cancelCountdown();
+                    return;
                 }
-            } else {
-                toggleTimer();
-            }
-        });
-        
-        editCorner.addEventListener('click', toggleEditMode);
-        globalConfigBtn.addEventListener('click', () => configModal.showModal());
-        themeSwitcher.addEventListener('change', (e) => {
-            document.documentElement.setAttribute('data-theme', e.target.value);
-            if (e.target.value === 'light' || e.target.value === 'corporate') {
-                document.body.classList.add('light-theme');
-            } else {
-                document.body.classList.remove('light-theme');
-            }
-        });
-        
-        // Configuración del efecto de retroiluminación
-        glowEffectToggle.addEventListener('change', (e) => {
-            glowEffectEnabled = e.target.checked;
-            document.body.classList.toggle('glow-effect', glowEffectEnabled);
-        });
-        
-        // Configuración de intensidad LED
-        ledIntensity.addEventListener('input', (e) => {
-            const intensity = e.target.value;
-            document.documentElement.style.setProperty('--glow-intensity', `${intensity}px`);
-        });
-        
-        // Guardar configuración
-        document.getElementById('save-config').addEventListener('click', () => {
-            localStorage.setItem('glowEffect', glowEffectToggle.checked);
-            localStorage.setItem('ledIntensity', ledIntensity.value);
-            configModal.close();
-        });
-        
-        // Modo concentración
-        fullscreenBtn.addEventListener('click', () => {
-            if (activeProgram === 'clock') {
-                isFullscreen = true;
-                concentrationMode.classList.remove('hidden');
-            }
-        });
-        
-        concentrationActionBtn.addEventListener('click', toggleTimer);
-        minimizeBtn.addEventListener('click', () => {
-            isFullscreen = false;
-            concentrationMode.classList.add('hidden');
-        });
-        
-        // Crear programa personalizado
-        document.getElementById('programForm').addEventListener('submit', (e) => {
-            e.preventDefault();
+                
+                if (state.activeProgram === 'clock') {
+                    state.isConnected = !state.isConnected;
+                    state.elements.actionBtn.textContent = state.isConnected ? 
+                        'Desconectar dispositivo' : 'Enviar al dispositivo';
+                } else {
+                    state.isTimerRunning ? timerLogic.pauseTimer() : timerLogic.startTimer();
+                }
+            });
             
-            const programName = document.getElementById('program-name').value;
-            const programId = 'custom-' + Date.now();
+            // Botón de reset
+            state.elements.resetBtn.addEventListener('click', () => {
+                if (state.countdownActive) {
+                    countdownLogic.cancelCountdown();
+                } else {
+                    timerLogic.resetTimer();
+                }
+            });
             
-            const newProgram = {
-                id: programId,
-                name: programName,
-                description: document.getElementById('program-description').value,
-                countdown: document.getElementById('countdown').value,
-                initialTime: 300, // Valor por defecto
-                direction: 'down'  // Valor por defecto
+            // Botón de reset en modo concentración
+            state.elements.concentrationResetBtn.addEventListener('click', () => {
+                timerLogic.resetTimer();
+            });
+            
+            // Modo edición
+            state.elements.editCorner.addEventListener('click', () => {
+                state.editMode = !state.editMode;
+                document.body.classList.toggle('edit-mode', state.editMode);
+                const editIcon = state.elements.editCorner.querySelector('i');
+                editIcon.className = state.editMode ? 'fas fa-check' : 'fas fa-pencil-alt';
+                state.elements.customProgramBtn.classList.toggle('hidden', !state.editMode);
+                
+                // Mostrar u ocultar botones de eliminar
+                document.querySelectorAll('.delete-custom').forEach(btn => {
+                    btn.style.display = state.editMode ? 'flex' : 'none';
+                });
+            });
+            
+            // Configuración global
+            state.elements.globalConfigBtn.addEventListener('click', () => state.elements.configModal.showModal());
+            
+            // Tema
+            state.elements.themeSwitcher.addEventListener('change', (e) => {
+                document.documentElement.setAttribute('data-theme', e.target.value);
+                document.body.classList.toggle('light-theme', 
+                    ['light', 'corporate'].includes(e.target.value));
+            });
+            
+            // Efecto de retroiluminación
+            state.elements.glowEffectToggle.addEventListener('change', (e) => {
+                state.glowEffectEnabled = e.target.checked;
+                document.body.classList.toggle('glow-effect', state.glowEffectEnabled);
+            });
+            
+            // Auto fullscreen
+            state.elements.autoFullscreenToggle.addEventListener('change', (e) => {
+                state.autoFullscreen = e.target.checked;
+            });
+            
+            // Cuenta regresiva por defecto
+            state.elements.defaultCountdownSelect.addEventListener('change', (e) => {
+                state.defaultCountdown = parseInt(e.target.value);
+            });
+            
+            // Intensidad LED
+            state.elements.ledIntensity.addEventListener('input', (e) => {
+                document.documentElement.style.setProperty('--glow-intensity', `${e.target.value}px`);
+            });
+            
+            // Guardar configuración
+            document.getElementById('save-config').addEventListener('click', () => {
+                localStorage.setItem('glowEffect', state.elements.glowEffectToggle.checked);
+                localStorage.setItem('ledIntensity', state.elements.ledIntensity.value);
+                localStorage.setItem('autoFullscreen', state.elements.autoFullscreenToggle.checked);
+                localStorage.setItem('defaultCountdown', state.defaultCountdown);
+            });
+            
+            // Modo concentración - ahora funciona con todos los programas
+            state.elements.fullscreenBtn.addEventListener('click', () => {
+                state.isFullscreen = true;
+                state.elements.concentrationMode.classList.remove('hidden');
+            });
+            
+            state.elements.concentrationActionBtn.addEventListener('click', () => {
+                state.isTimerRunning ? timerLogic.pauseTimer() : timerLogic.startTimer();
+            });
+            
+            state.elements.minimizeBtn.addEventListener('click', () => {
+                state.isFullscreen = false;
+                state.elements.concentrationMode.classList.add('hidden');
+            });
+            
+            // Crear programa personalizado
+            state.elements.customProgramBtn.addEventListener('click', () => {
+                if (state.editMode) state.elements.createProgramModal.showModal();
+            });
+            
+            // Configuración de programas
+            const configurablePrograms = ['count-up', 'count-down', 'amrap', 'emom', 'hiit', 'tabata'];
+            const modals = {
+                'count-up': document.getElementById('config-count-up-modal'),
+                'count-down': document.getElementById('config-count-down-modal'),
+                'amrap': document.getElementById('config-amrap-modal'),
+                'emom': document.getElementById('config-emom-modal'),
+                'hiit': document.getElementById('config-hiit-modal'),
+                'tabata': document.getElementById('config-tabata-modal')
             };
             
-            customPrograms.push(newProgram);
-            createCustomProgramCard(newProgram);
-            saveCustomPrograms();
+            // Configurar botones de cancelar para los modales
+            const cancelButtons = {
+                'count-up': document.getElementById('cancel-count-up'),
+                'count-down': document.getElementById('cancel-count-down'),
+                'amrap': document.getElementById('cancel-amrap'),
+                'emom': document.getElementById('cancel-emom'),
+                'hiit': document.getElementById('cancel-hiit'),
+                'tabata': document.getElementById('cancel-tabata')
+            };
             
-            createProgramModal.close();
-            document.getElementById('programForm').reset();
-        });
-        
-        // Cancelar creación de programa
-        document.getElementById('cancelCreate').addEventListener('click', () => {
-            createProgramModal.close();
-        });
-        
-        // Inicialización
+            // Configurar botones de aplicar para los modales
+            const applyButtons = {
+                'count-up': document.getElementById('apply-count-up'),
+                'count-down': document.getElementById('apply-count-down'),
+                'amrap': document.getElementById('apply-amrap'),
+                'emom': document.getElementById('apply-emom'),
+                'hiit': document.getElementById('apply-hiit'),
+                'tabata': document.getElementById('apply-tabata')
+            };
+            
+            // Configurar evento de cancelar para cerrar el modal
+            Object.keys(cancelButtons).forEach(program => {
+                const cancelButton = cancelButtons[program];
+                if (cancelButton) {
+                    cancelButton.addEventListener('click', () => {
+                        if (modals[program]) {
+                            modals[program].close();
+                        }
+                    });
+                }
+            });
+            
+            // Configurar evento de aplicar para guardar la configuración
+            Object.keys(applyButtons).forEach(program => {
+                const applyButton = applyButtons[program];
+                if (applyButton) {
+                    applyButton.addEventListener('click', () => {
+                        switch(program) {
+                            case 'count-up':
+                                state.programConfig['count-up'].maxTime = utils.timeToSeconds(
+                                    document.getElementById('count-up-max').value
+                                );
+                                break;
+                            case 'count-down':
+                                state.programConfig['count-down'].initialTime = utils.timeToSeconds(
+                                    document.getElementById('count-down-init').value
+                                );
+                                break;
+                            case 'amrap':
+                                state.programConfig['amrap'].duration = utils.timeToSeconds(
+                                    document.getElementById('amrap-duration').value
+                                );
+                                break;
+                            case 'emom':
+                                state.programConfig['emom'].totalMinutes = parseInt(document.getElementById('emom-total').value);
+                                state.programConfig['emom'].reps = parseInt(document.getElementById('emom-reps').value);
+                                break;
+                            case 'hiit':
+                                state.programConfig['hiit'].warmup = parseInt(document.getElementById('hiit-warmup').value);
+                                state.programConfig['hiit'].work = parseInt(document.getElementById('hiit-work').value);
+                                state.programConfig['hiit'].rest = parseInt(document.getElementById('hiit-rest').value);
+                                state.programConfig['hiit'].rounds = parseInt(document.getElementById('hiit-rounds').value);
+                                state.programConfig['hiit'].cooldown = parseInt(document.getElementById('hiit-cooldown').value);
+                                state.programConfig['hiit'].direction = 
+                                    document.querySelector('input[name="hiit-direction"]:checked').value;
+                                break;
+                            case 'tabata':
+                                state.programConfig['tabata'].rounds = parseInt(document.getElementById('tabata-rounds').value);
+                                state.programConfig['tabata'].work = parseInt(document.getElementById('tabata-work').value);
+                                state.programConfig['tabata'].rest = parseInt(document.getElementById('tabata-rest').value);
+                                break;
+                        }
+                        programLogic.setProgram(program);
+                        if (modals[program]) {
+                            modals[program].close();
+                        }
+                    });
+                }
+            });
+            
+            configurablePrograms.forEach(program => {
+                document.querySelector(`[data-program="${program}"]`).addEventListener('click', () => {
+                    if (state.editMode) {
+                        // Configurar y mostrar modal
+                        switch(program) {
+                            case 'count-up':
+                                document.getElementById('count-up-max').value = 
+                                    utils.secondsToTime(state.programConfig['count-up'].maxTime);
+                                break;
+                            case 'count-down':
+                                document.getElementById('count-down-init').value = 
+                                    utils.secondsToTime(state.programConfig['count-down'].initialTime);
+                                break;
+                            case 'amrap':
+                                document.getElementById('amrap-duration').value = 
+                                    utils.secondsToTime(state.programConfig['amrap'].duration);
+                                break;
+                            case 'emom':
+                                document.getElementById('emom-total').value = state.programConfig['emom'].totalMinutes;
+                                document.getElementById('emom-reps').value = state.programConfig['emom'].reps;
+                                break;
+                            case 'hiit':
+                                document.getElementById('hiit-warmup').value = state.programConfig['hiit'].warmup;
+                                document.getElementById('hiit-work').value = state.programConfig['hiit'].work;
+                                document.getElementById('hiit-rest').value = state.programConfig['hiit'].rest;
+                                document.getElementById('hiit-rounds').value = state.programConfig['hiit'].rounds;
+                                document.getElementById('hiit-cooldown').value = state.programConfig['hiit'].cooldown;
+                                document.querySelector(`#hiit-${state.programConfig['hiit'].direction}`).checked = true;
+                                break;
+                            case 'tabata':
+                                document.getElementById('tabata-rounds').value = state.programConfig['tabata'].rounds;
+                                document.getElementById('tabata-work').value = state.programConfig['tabata'].work;
+                                document.getElementById('tabata-rest').value = state.programConfig['tabata'].rest;
+                                break;
+                        }
+                        if (modals[program]) {
+                            modals[program].showModal();
+                        }
+                    } else {
+                        programLogic.setProgram(program);
+                    }
+                });
+            });
+            
+            // Programas sin configuración
+            ['clock', 'stopwatch', 'for-time'].forEach(program => {
+                document.querySelector(`[data-program="${program}"]`).addEventListener('click', () => {
+                    if (!state.editMode) programLogic.setProgram(program);
+                });
+            });
+        }
+
+        // Inicialización de la aplicación
         function initApp() {
-            initDisplay();
-            initProgramModals();
+            initElements();
+            setupEventListeners();
             initProgramCreationModal();
-            loadCustomPrograms();
-            setProgram('clock');
-            setInterval(updateClock, 1000);
+            customPrograms.loadCustomPrograms();
+            programLogic.setProgram('clock');
+            
+            // Actualizar reloj cada segundo
+            setInterval(() => {
+                if (state.activeProgram === 'clock') {
+                    timerLogic.updateClock();
+                }
+            }, 1000);
             
             // Cargar configuración guardada
             const savedGlow = localStorage.getItem('glowEffect');
             if (savedGlow !== null) {
-                glowEffectEnabled = savedGlow === 'true';
-                glowEffectToggle.checked = glowEffectEnabled;
-                document.body.classList.toggle('glow-effect', glowEffectEnabled);
+                state.glowEffectEnabled = savedGlow === 'true';
+                state.elements.glowEffectToggle.checked = state.glowEffectEnabled;
+                document.body.classList.toggle('glow-effect', state.glowEffectEnabled);
             }
             
             const savedIntensity = localStorage.getItem('ledIntensity');
             if (savedIntensity !== null) {
-                ledIntensity.value = savedIntensity;
+                state.elements.ledIntensity.value = savedIntensity;
                 document.documentElement.style.setProperty('--glow-intensity', `${savedIntensity}px`);
             }
+            
+            const savedAutoFullscreen = localStorage.getItem('autoFullscreen');
+            if (savedAutoFullscreen !== null) {
+                state.autoFullscreen = savedAutoFullscreen === 'true';
+                state.elements.autoFullscreenToggle.checked = state.autoFullscreen;
+            }
+            
+            const savedDefaultCountdown = localStorage.getItem('defaultCountdown');
+            if (savedDefaultCountdown !== null) {
+                state.defaultCountdown = parseInt(savedDefaultCountdown);
+                if (state.elements.defaultCountdownSelect) {
+                    state.elements.defaultCountdownSelect.value = state.defaultCountdown;
+                }
+            }
         }
-        
+
         // Iniciar la aplicación
-        initApp();
+        document.addEventListener('DOMContentLoaded', initApp);
     </script>
 </body>
 </html>
