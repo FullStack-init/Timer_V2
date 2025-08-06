@@ -197,26 +197,16 @@
           font-size: 3.5rem !important;
         }
       }
-      /* Estilos para toasts - AJUSTADOS PARA SER COMPACTOS Y RESPONSIVOS */
+      /* Estilos para toasts - POSICIÓN CORREGIDA */
       .toast {
         position: fixed;
         top: 1rem;
         left: 50%;
         transform: translateX(-50%);
         z-index: 9999;
-        width: fit-content; 
-        max-width: 90vw;
-        height: fit-content;
-        max-height: 90vh;
-        box-sizing: border-box;
-        padding: 0.25rem 0.5rem; 
-        text-align: center;
-        white-space: normal;
-        word-wrap: break-word;
+        max-width: 90%;
+        width: 300px;
         transition: opacity 0.3s ease, transform 0.3s ease;
-        margin: 0;
-        border: none;
-        border-radius: 0.25rem; 
       }
       .toast.hidden {
         opacity: 0;
@@ -226,29 +216,11 @@
         opacity: 1;
         transform: translateX(-50%);
       }
-      .toast span {
-          font-size: 0.875rem;
-          padding: 0;
-          margin: 0;
-      }
     </style>
   </head>
   <body class="h-full">
     <!-- Contenedor para toasts -->
     <div id="toast-container" class="toast-container"></div>
-    
-    <!-- Modal de confirmación para eliminar programa -->
-    <dialog id="confirmDeleteModal" class="modal">
-      <div class="modal-box">
-        <h3 class="font-bold text-lg mb-4">¿Eliminar este programa?</h3>
-        <p class="mb-4">Esta acción no se puede deshacer. ¿Estás seguro de que deseas eliminar este programa?</p>
-        <div class="modal-action">
-          <button id="cancelDeleteBtn" class="btn btn-ghost">Cancelar</button>
-          <button id="confirmDeleteBtn" class="btn btn-error">Eliminar</button>
-        </div>
-      </div>
-    </dialog>
-    
     <!-- Plantilla de Bloque Principal -->
     <template id="main-block-template">
       <article
@@ -649,7 +621,6 @@
         const toastContainer = document.createElement('div');
         toastContainer.id = 'toast-container';
         document.body.appendChild(toastContainer);
-        
         // Elementos adicionales para reloj y cronómetro
         const currentTime = document.getElementById("current-time");
         const stopwatchTime = document.getElementById("stopwatch-time");
@@ -660,14 +631,6 @@
         let clockInterval = null;
         let isClockActive = false;
         let isStopwatchActive = false;
-        let isClockConnected = false; // Nuevo estado para el reloj
-        
-        // Modal de confirmación
-        const confirmDeleteModal = $("confirmDeleteModal");
-        const cancelDeleteBtn = $("cancelDeleteBtn");
-        const confirmDeleteBtn = $("confirmDeleteBtn");
-        let programToDelete = null;
-        
         // Inicializar Web Audio API
         const initAudio = () => {
           try {
@@ -676,7 +639,6 @@
             console.error("Web Audio API no está soportado en este navegador", e);
           }
         };
-        
         // Crear un sonido de beep (más agudo y ligeramente más largo)
         const createBeep = (frequency = 880, duration = 0.35, type = 'sine') => {
           if (!audioContext || !soundsEnabled) return;
@@ -691,7 +653,6 @@
           oscillator.start();
           oscillator.stop(audioContext.currentTime + duration);
         };
-        
         // Mostrar toast
         const showToast = (message, type = 'info', duration = 3000) => {
           const toast = document.createElement('div');
@@ -710,7 +671,6 @@
             }, 300);
           }, duration);
         };
-        
         // ✅ SOLUCIÓN DEFINITIVA - MENÚ MANUAL SIN DAISYUI
         // Cerrar el menú si se hace clic fuera de él
         document.addEventListener('click', (e) => {
@@ -718,13 +678,11 @@
             settingsMenu.classList.add('hidden');
           }
         });
-        
         // Manejar el clic en el botón hamburguesa
         hamburgerMenu.addEventListener('click', (e) => {
           e.stopPropagation();
           settingsMenu.classList.toggle('hidden');
         });
-        
         // ✅ Cerrar modal si clic empieza y termina fuera
         let clickStartedOutside = false;
         dialog.addEventListener("mousedown", (e) => {
@@ -736,14 +694,12 @@
           }
           clickStartedOutside = false;
         });
-        
         // Formato de tiempo MM:SS
         const formatTimeInput = (input) => {
           let v = input.value.replace(/\D/g, "").substring(0, 4);
           if (v.length > 2) v = v.substring(0, 2) + ":" + v.substring(2);
           input.value = v;
         };
-        
         // Renumerar bloques automáticamente
         const renumberBlocks = () => {
           let mainBlockCount = 0;
@@ -775,7 +731,6 @@
                 });
             });
         };
-        
         // Crear sub-bloque
         const createSubBlock = (data = {}) => {
           const template = document.getElementById("sub-block-template");
@@ -795,7 +750,6 @@
           }
           return clone;
         };
-        
         // Crear bloque principal
         const createMainBlock = (data = {}) => {
           const template = document.getElementById("main-block-template");
@@ -820,7 +774,6 @@
           }
           return clone;
         };
-        
         // Eventos en blockList
         blockList.addEventListener("click", (e) => {
           const button = e.target.closest("[data-action]");
@@ -879,7 +832,6 @@
               break;
           }
         });
-        
         blockList.addEventListener("focusin", (e) => {
           if (
             e.target.matches('[data-field="time"], [data-field="warning"]') &&
@@ -888,13 +840,11 @@
             e.target.value = "00:00";
           }
         });
-        
         blockList.addEventListener("input", (e) => {
           if (e.target.matches('[data-field="time"], [data-field="warning"]')) {
             formatTimeInput(e.target);
           }
         });
-        
         // Obtener datos del programa desde el modal
         const getBlockData = (block) => {
           const titleEl = block.querySelector('[data-action="edit-title"]');
@@ -915,7 +865,6 @@
           }
           return data;
         };
-        
         const getProgramData = () => {
           return {
             id: currentProgramId || Date.now().toString(),
@@ -925,28 +874,23 @@
             structure: Array.from(blockList.children).map(getBlockData),
           };
         };
-        
         // Guardar en localStorage
         const saveAllPrograms = (programs) => {
           localStorage.setItem("programsList", JSON.stringify(programs));
         };
-        
         const loadAllPrograms = () => {
           return JSON.parse(localStorage.getItem("programsList")) || [];
         };
-        
         // Guardar configuración de sonidos
         const saveSoundSettings = () => {
           localStorage.setItem("soundsEnabled", soundsEnabled);
         };
-        
         // Cargar configuración de sonidos
         const loadSoundSettings = () => {
           const saved = localStorage.getItem("soundsEnabled");
           soundsEnabled = saved === null || saved === "true"; // Por defecto habilitado
           soundToggle.checked = soundsEnabled;
         };
-        
         // Exportar programas
         const exportPrograms = () => {
           const programs = loadAllPrograms();
@@ -969,7 +913,6 @@
             showToast("Programas exportados exitosamente", "success", 2000);
           }, 0);
         };
-        
         // Importar programas
         const importPrograms = (event) => {
           const file = event.target.files[0];
@@ -1002,7 +945,6 @@
           // Resetear el input para permitir importar el mismo archivo de nuevo
           event.target.value = null;
         };
-        
         // Renderizar programas guardados
         const renderPrograms = () => {
           const programs = loadAllPrograms();
@@ -1067,7 +1009,6 @@
           // 4. Actualizar el estado del modo edición
           updateEditModeState();
         };
-        
         // Actualizar el estado del modo edición
         const updateEditModeState = () => {
           const containers = programsContainer.querySelectorAll('.program-card-container');
@@ -1091,7 +1032,6 @@
             editModeBtn.classList.remove('btn-disabled');
           }
         };
-        
         // Alternar modo edición
         const toggleEditMode = () => {
           if (isTimerRunning) {
@@ -1101,7 +1041,6 @@
           isEditMode = !isEditMode;
           updateEditModeState();
         };
-        
         // Seleccionar un programa (no iniciar automáticamente)
         const selectProgram = (program) => {
           // Si ya está corriendo un timer, no permitir cambio
@@ -1134,7 +1073,6 @@
           // Actualizar el estado del botón de edición
           updateEditModeState();
         };
-        
         // Función para activar el reloj
         const activateClock = () => {
           // Si ya está corriendo un timer, no permitir cambio
@@ -1156,14 +1094,12 @@
           // Actualizar estado
           isClockActive = true;
           isStopwatchActive = false;
-          isClockConnected = false; // Por defecto, el reloj no está conectado al dispositivo
           // Actualizar UI
           programName.textContent = "Reloj";
           programName.classList.remove('hidden');
-          // Mensaje actualizado según la solicitud
-          timerStatus.textContent = "Tocar play servirá para conectar el reloj con el dispositivo";
+          timerStatus.textContent = "Reloj seleccionado";
           // Actualizar el botón de play
-          playPauseBtn.innerHTML = '<i class="fas fa-play mr-2"></i> Conectar';
+          playPauseBtn.innerHTML = '<i class="fas fa-play mr-2"></i> Enviar';
           playPauseBtn.disabled = false;
           playPauseBtn.classList.remove('btn-disabled');
           // Actualizar el botón de reset
@@ -1174,47 +1110,37 @@
           // Actualizar la hora inmediatamente
           updateClock();
           isTimerRunning = false;
-          
-          // Asegurar que el reloj se actualice visualmente
+        };
+        // Función para enviar el reloj
+        const sendClock = () => {
+          // Actualizar UI
+          timerStatus.textContent = "Reloj en marcha";
+          playPauseBtn.innerHTML = '<i class="fas fa-pause mr-2"></i> Pausar';
+          isTimerRunning = true;
+          // Mostrar toast
+          showToast("Reloj enviado al dispositivo con éxito", "success", 2000);
+          // Iniciar el intervalo para actualizar la hora
           if (!clockInterval) {
             clockInterval = setInterval(updateClock, 1000);
           }
-        };
-        
-        // Función para conectar el reloj (simular envío al dispositivo)
-        const connectClock = () => {
-          // Actualizar estado
-          isClockConnected = true;
-          
-          // Actualizar UI
-          timerStatus.textContent = "Tocar pausa para desconectar el dispositivo";
-          playPauseBtn.innerHTML = '<i class="fas fa-pause mr-2"></i> Desconectar';
-          isTimerRunning = true;
-          
-          // Mostrar toast
-          showToast("Reloj conectado al dispositivo con éxito", "success", 2000);
-          
           // Bloquear todos los programas
           blockAllPrograms();
         };
-        
-        // Función para desconectar el reloj
-        const disconnectClock = () => {
-          // Actualizar estado
-          isClockConnected = false;
-          
+        // Función para pausar el reloj
+        const pauseClock = () => {
+          if (clockInterval) {
+            clearInterval(clockInterval);
+            clockInterval = null;
+          }
           // Actualizar UI
-          timerStatus.textContent = "Tocar play servirá para conectar el reloj con el dispositivo";
-          playPauseBtn.innerHTML = '<i class="fas fa-play mr-2"></i> Conectar';
+          timerStatus.textContent = "Reloj pausado";
+          playPauseBtn.innerHTML = '<i class="fas fa-play mr-2"></i> Continuar';
           isTimerRunning = false;
-          
           // Mostrar toast
-          showToast("Reloj desconectado del dispositivo", "info", 2000);
-          
+          showToast("Reloj pausado con éxito", "success", 2000);
           // Desbloquear todos los programas
           unblockAllPrograms();
         };
-        
         // Función para activar el cronómetro
         const activateStopwatch = () => {
           // Si ya está corriendo un timer, no permitir cambio
@@ -1251,7 +1177,6 @@
           updateEditModeState();
           isTimerRunning = false;
         };
-        
         // Iniciar el cronómetro
         const startStopwatch = () => {
           stopwatchRunning = true;
@@ -1273,7 +1198,6 @@
           // Bloquear todos los programas
           blockAllPrograms();
         };
-        
         // Pausar el cronómetro
         const pauseStopwatch = () => {
           stopwatchRunning = false;
@@ -1286,7 +1210,6 @@
           // Desbloquear todos los programas
           unblockAllPrograms();
         };
-        
         // Reiniciar el cronómetro
         const resetStopwatch = () => {
           clearInterval(stopwatchInterval);
@@ -1301,8 +1224,11 @@
             timerStatus.textContent = "Cronómetro seleccionado";
             playPauseBtn.innerHTML = '<i class="fas fa-play mr-2"></i> Iniciar';
           }
+          // CORRECCIÓN CLAVE: Establecer isTimerRunning a false
+          isTimerRunning = false;
+          // Desbloquear todos los programas
+          unblockAllPrograms();
         };
-        
         // Actualizar el reloj en tiempo real
         const updateClock = () => {
           const now = new Date();
@@ -1316,7 +1242,6 @@
             timerDisplay.textContent = timeString;
           }
         };
-        
         // Iniciar un programa
         const startProgram = () => {
           if (!currentProgram) {
@@ -1366,7 +1291,6 @@
             startTimer();
           }
         };
-        
         // Iniciar el timer
         const startTimer = () => {
           // Asegurar que el bloque actual existe
@@ -1471,7 +1395,6 @@
             }
           }, 1000);
         };
-        
         // Pausar el timer
         const pauseTimer = () => {
           if (timerInterval) {
@@ -1482,9 +1405,9 @@
             clearInterval(countdownInterval);
             countdownInterval = null;
           }
-          // Si es reloj, manejar la desconexión
+          // Si es reloj, pausar el reloj
           if (isClockActive) {
-            disconnectClock();
+            pauseClock();
           } 
           // Si es cronómetro, pausar el cronómetro
           else if (isStopwatchActive) {
@@ -1498,7 +1421,6 @@
             unblockAllPrograms();
           }
         };
-        
         // Reiniciar el timer
         const resetTimer = () => {
           if (timerInterval) {
@@ -1527,7 +1449,6 @@
             }
           }
         };
-        
         // Bloquear todos los programas
         const blockAllPrograms = () => {
           const programContainers = programsContainer.querySelectorAll('.program-card-container');
@@ -1535,7 +1456,6 @@
             container.classList.add('disabled');
           });
         };
-        
         // Desbloquear todos los programas
         const unblockAllPrograms = () => {
           const programContainers = programsContainer.querySelectorAll('.program-card-container');
@@ -1543,7 +1463,6 @@
             container.classList.remove('disabled');
           });
         };
-        
         // Abrir modal en modo edición
         const openEditModal = (program) => {
           isEditing = true;
@@ -1561,7 +1480,6 @@
           deleteProgramContainer.classList.remove('hidden');
           dialog.showModal();
         };
-        
         // Abrir modal en modo creación
         const openCreateModal = () => {
           isEditing = false;
@@ -1575,17 +1493,9 @@
           deleteProgramContainer.classList.add('hidden');
           dialog.showModal();
         };
-        
-        // Mostrar modal de confirmación para eliminar programa
-        const showDeleteConfirmation = (programId) => {
-          programToDelete = programId;
-          confirmDeleteModal.showModal();
-        };
-        
         // Botones
         const newProgramCard = document.querySelector('.new-program-card');
         newProgramCard.addEventListener("click", openCreateModal);
-        
         // Eventos para el reloj - SOLO SELECCIONA, NO INICIA AUTOMÁTICAMENTE
         const clockCard = document.querySelector('.clock-card');
         if (clockCard) {
@@ -1595,7 +1505,6 @@
             }
           });
         }
-        
         // Eventos para el cronómetro - SOLO SELECCIONA, NO INICIA AUTOMÁTICAMENTE
         const stopwatchCard = document.querySelector('.stopwatch-card');
         if (stopwatchCard) {
@@ -1605,84 +1514,50 @@
             }
           });
         }
-        
         $("closeDialogBtn").addEventListener("click", () => dialog.close());
         $("cancelCreate").addEventListener("click", () => dialog.close());
         $("addMainBlockBtn").addEventListener("click", () => {
           blockList.appendChild(createMainBlock());
           renumberBlocks();
         });
-        
         // Botones del timer
         playPauseBtn.addEventListener('click', () => {
-          // Si el reloj está activo
-          if (isClockActive) {
-            if (!isClockConnected) {
-              connectClock();
-            } else {
-              disconnectClock();
-            }
-            return; // Salimos, no ejecutamos la lógica de cronómetro/programa normal
-          }
-          
-          // Lógica original para cronómetro y programas normales
           if (isTimerRunning) {
-            pauseTimer(); // Esto maneja cronómetro y programas
+            pauseTimer();
           } else {
-            if (isStopwatchActive) {
+            if (isClockActive) {
+              sendClock();
+            } else if (isStopwatchActive) {
               startStopwatch();
             } else if (currentProgram) {
               startProgram();
             }
           }
         });
-        
         resetBtn.addEventListener('click', () => {
-          // Si es reloj, no hacer nada
-          if (isClockActive) {
-            return;
-          }
-          
           if (currentProgram) {
             resetTimer();
           } else if (isStopwatchActive) {
             resetStopwatch();
           }
         });
-        
         // Botón de modo edición
         editModeBtn.addEventListener('click', toggleEditMode);
-        
         // Toggle de sonidos
         soundToggle.addEventListener('change', () => {
           soundsEnabled = soundToggle.checked;
           saveSoundSettings();
         });
-        
         // Eliminar programa desde el modal
         deleteProgramBtn.addEventListener('click', () => {
-          showDeleteConfirmation(currentProgramId);
-        });
-        
-        // Confirmar eliminación
-        confirmDeleteBtn.addEventListener('click', () => {
-          if (programToDelete) {
-            const programs = loadAllPrograms().filter((p) => p.id !== programToDelete);
+          if (confirm("¿Eliminar este programa?")) {
+            const programs = loadAllPrograms().filter((p) => p.id !== currentProgramId);
             saveAllPrograms(programs);
             renderPrograms();
             dialog.close();
-            confirmDeleteModal.close();
             showToast("Programa eliminado exitosamente", "success", 2000);
-            programToDelete = null;
           }
         });
-        
-        // Cancelar eliminación
-        cancelDeleteBtn.addEventListener('click', () => {
-          confirmDeleteModal.close();
-          programToDelete = null;
-        });
-        
         // Guardar programa (crear o editar)
         $("programForm").addEventListener("submit", (e) => {
           e.preventDefault();
@@ -1701,16 +1576,13 @@
           dialog.close();
           showToast("Programa guardado exitosamente.", "success", 2000);
         });
-        
         // Importar/Exportar
         $("exportProgramsBtn").addEventListener("click", exportPrograms);
         $("importProgramsInput").addEventListener("change", importPrograms);
-        
         // Cambiar tema
         $("themeSwitcher").addEventListener("change", (e) => {
           document.documentElement.setAttribute("data-theme", e.target.value);
         });
-        
         // Inicializar
         initAudio();
         loadSoundSettings();
