@@ -21,7 +21,6 @@
       };
     </script>
     <style>
-      /* Sistema de tarjetas cuadradas - CORRECCIÓN CON MEJORES PRÁCTICAS */
       .square-card {
         position: relative;
         width: 100%;
@@ -45,13 +44,6 @@
         padding: 0.75rem;
         box-sizing: border-box;
       }
-      
-      /* Ajuste para evitar conflictos con DaisyUI */
-      .program-card {
-        width: 100% !important;
-        height: 100% !important;
-      }
-      
       .timer-container {
         position: relative;
         margin-bottom: 1.5rem;
@@ -167,7 +159,6 @@
           font-size: 0.7rem;
           height: 4.2em;
         }
-        /* Mantener tamaño original pero ajustar para móviles */
         .text-8xl {
           font-size: 5rem !important;
         }
@@ -194,12 +185,8 @@
           font-size: 0.8rem;
           line-height: 1.15;
         }
-        /* Corrección para pantallas muy pequeñas: tamaño adecuado */
-        .text-8xl {
-          font-size: 3.5rem !important;
-        }
       }
-      /* Estilos para toasts - POSICIÓN CORREGIDA */
+      /* Estilos para toasts - CORREGIDOS */
       .toast {
         position: fixed;
         top: 1rem;
@@ -436,7 +423,7 @@
               <div class="relative">
                 <!-- Nombre del programa movido inmediatamente arriba del timer -->
                 <div id="programName" class="program-name hidden">Nombre del programa</div>
-                <!-- Tamaño de fuente responsivo para el timer -->
+                <!-- Tamaño de fuente aumentado a text-8xl -->
                 <div class="text-8xl font-mono text-center mb-2" id="timerDisplay">00:00</div>
                 <div id="timerStatus" class="text-center text-sm timer-status mb-3">Selecciona un programa para comenzar</div>
               </div>
@@ -663,7 +650,7 @@
         // Mostrar toast
         const showToast = (message, type = 'info', duration = 3000) => {
           const toast = document.createElement('div');
-          toast.className = `alert ${type === 'success' ? 'alert-success' : type === 'error' ? 'alert-error' : 'alert-info'} shadow-lg mb-2 toast hidden`;
+          toast.className = `alert ${type === 'success' ? 'alert-success' : type === 'error' ? 'alert-error' : 'alert-info'} shadow-lg p-2 max-w-xs line-clamp-2 opacity-90 toast hidden`;
           toast.innerHTML = `<span>${message}</span>`;
           toastContainer.appendChild(toast);
           // Forzar reflow para activar la transición
