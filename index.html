@@ -21,6 +21,7 @@
       };
     </script>
     <style>
+      /* Sistema de tarjetas cuadradas - CORRECCIÓN CON MEJORES PRÁCTICAS */
       .square-card {
         position: relative;
         width: 100%;
@@ -43,6 +44,11 @@
         align-items: center;
         padding: 0.75rem;
         box-sizing: border-box;
+      }
+      /* Ajuste para evitar conflictos con DaisyUI */
+      .program-card {
+        width: 100% !important;
+        height: 100% !important;
       }
       .timer-container {
         position: relative;
@@ -159,6 +165,7 @@
           font-size: 0.7rem;
           height: 4.2em;
         }
+        /* Mantener tamaño original pero ajustar para móviles */
         .text-8xl {
           font-size: 5rem !important;
         }
@@ -185,17 +192,31 @@
           font-size: 0.8rem;
           line-height: 1.15;
         }
+        /* Corrección para pantallas muy pequeñas: tamaño adecuado */
+        .text-8xl {
+          font-size: 3.5rem !important;
+        }
       }
-      /* Estilos para toasts - CORREGIDOS */
+      /* Estilos para toasts - AJUSTADOS PARA SER COMPACTOS Y RESPONSIVOS */
       .toast {
         position: fixed;
         top: 1rem;
         left: 50%;
         transform: translateX(-50%);
         z-index: 9999;
-        max-width: 90%;
-        width: 300px;
+        width: fit-content; 
+        max-width: 90vw;
+        height: fit-content;
+        max-height: 90vh;
+        box-sizing: border-box;
+        padding: 0.25rem 0.5rem; 
+        text-align: center;
+        white-space: normal;
+        word-wrap: break-word;
         transition: opacity 0.3s ease, transform 0.3s ease;
+        margin: 0;
+        border: none;
+        border-radius: 0.25rem; 
       }
       .toast.hidden {
         opacity: 0;
@@ -205,11 +226,29 @@
         opacity: 1;
         transform: translateX(-50%);
       }
+      .toast span {
+          font-size: 0.875rem;
+          padding: 0;
+          margin: 0;
+      }
     </style>
   </head>
   <body class="h-full">
     <!-- Contenedor para toasts -->
     <div id="toast-container" class="toast-container"></div>
+    
+    <!-- Modal de confirmación para eliminar programa -->
+    <dialog id="confirmDeleteModal" class="modal">
+      <div class="modal-box">
+        <h3 class="font-bold text-lg mb-4">¿Eliminar este programa?</h3>
+        <p class="mb-4">Esta acción no se puede deshacer. ¿Estás seguro de que deseas eliminar este programa?</p>
+        <div class="modal-action">
+          <button id="cancelDeleteBtn" class="btn btn-ghost">Cancelar</button>
+          <button id="confirmDeleteBtn" class="btn btn-error">Eliminar</button>
+        </div>
+      </div>
+    </dialog>
+    
     <!-- Plantilla de Bloque Principal -->
     <template id="main-block-template">
       <article
@@ -423,7 +462,7 @@
               <div class="relative">
                 <!-- Nombre del programa movido inmediatamente arriba del timer -->
                 <div id="programName" class="program-name hidden">Nombre del programa</div>
-                <!-- Tamaño de fuente aumentado a text-8xl -->
+                <!-- Tamaño de fuente responsivo para el timer -->
                 <div class="text-8xl font-mono text-center mb-2" id="timerDisplay">00:00</div>
                 <div id="timerStatus" class="text-center text-sm timer-status mb-3">Selecciona un programa para comenzar</div>
               </div>
@@ -463,7 +502,6 @@
                 </div>
               </div>
             </div>
-            
             <!-- Tarjeta fija de cronómetro -->
             <div class="program-card-container square-card">
               <div class="square-card-content">
@@ -477,7 +515,6 @@
                 </div>
               </div>
             </div>
-            
             <!-- Las tarjetas de programas se renderizarán aquí -->
             <div class="program-card-container square-card">
               <div class="square-card-content">
@@ -612,6 +649,7 @@
         const toastContainer = document.createElement('div');
         toastContainer.id = 'toast-container';
         document.body.appendChild(toastContainer);
+        
         // Elementos adicionales para reloj y cronómetro
         const currentTime = document.getElementById("current-time");
         const stopwatchTime = document.getElementById("stopwatch-time");
@@ -622,6 +660,13 @@
         let clockInterval = null;
         let isClockActive = false;
         let isStopwatchActive = false;
+        let isClockConnected = false; // Nuevo estado para el reloj
+        
+        // Modal de confirmación
+        const confirmDeleteModal = $("confirmDeleteModal");
+        const cancelDeleteBtn = $("cancelDeleteBtn");
+        const confirmDeleteBtn = $("confirmDeleteBtn");
+        let programToDelete = null;
         
         // Inicializar Web Audio API
         const initAudio = () => {
@@ -650,7 +695,7 @@
         // Mostrar toast
         const showToast = (message, type = 'info', duration = 3000) => {
           const toast = document.createElement('div');
-          toast.className = `alert ${type === 'success' ? 'alert-success' : type === 'error' ? 'alert-error' : 'alert-info'} shadow-lg p-2 max-w-xs line-clamp-2 opacity-90 toast hidden`;
+          toast.className = `alert ${type === 'success' ? 'alert-success' : type === 'error' ? 'alert-error' : 'alert-info'} shadow-lg mb-2 toast hidden`;
           toast.innerHTML = `<span>${message}</span>`;
           toastContainer.appendChild(toast);
           // Forzar reflow para activar la transición
@@ -961,11 +1006,9 @@
         // Renderizar programas guardados
         const renderPrograms = () => {
           const programs = loadAllPrograms();
-          
           // 1. Obtener referencias a las tarjetas fijas
           const fixedCards = [];
           const newProgramContainer = document.querySelector('.new-program-card').closest('.program-card-container');
-          
           // Identificar tarjetas fijas (reloj y cronómetro)
           const allCards = programsContainer.querySelectorAll('.program-card-container');
           allCards.forEach(card => {
@@ -975,7 +1018,6 @@
               fixedCards.push(card);
             }
           });
-          
           // 2. Limpiar SOLO las tarjetas de programas (no las fijas ni el botón de nuevo programa)
           allCards.forEach(container => {
             // Si no es una tarjeta fija y no es el botón de nuevo programa, eliminar
@@ -983,7 +1025,6 @@
               container.remove();
             }
           });
-          
           // 3. Insertar las tarjetas de programas entre las fijas y el botón de nuevo programa
           programs.forEach((program) => {
             const container = document.createElement('div');
@@ -1016,7 +1057,6 @@
             });
             container.appendChild(content);
             content.appendChild(card);
-            
             // Insertar después de las tarjetas fijas y antes del botón de nuevo programa
             if (fixedCards.length > 0) {
               programsContainer.insertBefore(container, fixedCards[fixedCards.length - 1].nextSibling);
@@ -1024,7 +1064,6 @@
               programsContainer.insertBefore(container, newProgramContainer);
             }
           });
-          
           // 4. Actualizar el estado del modo edición
           updateEditModeState();
         };
@@ -1070,7 +1109,6 @@
             showToast('Detén el timer actual antes de seleccionar otro programa', "error", 2000);
             return;
           }
-          
           // Limpiar cualquier estado de reloj/cronómetro
           if (clockInterval) {
             clearInterval(clockInterval);
@@ -1080,11 +1118,9 @@
             clearInterval(stopwatchInterval);
             stopwatchInterval = null;
           }
-          
           // Actualizar estado
           isClockActive = false;
           isStopwatchActive = false;
-          
           currentProgram = program;
           // Actualizar la UI para mostrar que este programa está seleccionado
           programName.textContent = program.name;
@@ -1093,10 +1129,8 @@
           // Actualizar el botón de play
           playPauseBtn.innerHTML = '<i class="fas fa-play mr-2"></i> Iniciar';
           isTimerRunning = false;
-          
           // ✅ CORRECCIÓN 3: Cambiar el formato del timer a MM:SS para programas normales
           timerDisplay.textContent = "00:00";
-          
           // Actualizar el estado del botón de edición
           updateEditModeState();
         };
@@ -1108,81 +1142,74 @@
             showToast('Detén el timer actual antes de seleccionar otro programa', "error", 2000);
             return;
           }
-          
           // Limpiar cualquier timer activo
           if (isTimerRunning) {
             pauseTimer();
           }
-          
           // Limpiar cualquier cronómetro activo
           if (stopwatchInterval) {
             clearInterval(stopwatchInterval);
             stopwatchInterval = null;
           }
-          
           // Limpiar estado de programa normal
           currentProgram = null;
-          
           // Actualizar estado
           isClockActive = true;
           isStopwatchActive = false;
-          
+          isClockConnected = false; // Por defecto, el reloj no está conectado al dispositivo
           // Actualizar UI
           programName.textContent = "Reloj";
           programName.classList.remove('hidden');
-          timerStatus.textContent = "Reloj seleccionado";
-          
+          // Mensaje actualizado según la solicitud
+          timerStatus.textContent = "Tocar play servirá para conectar el reloj con el dispositivo";
           // Actualizar el botón de play
-          playPauseBtn.innerHTML = '<i class="fas fa-play mr-2"></i> Enviar';
+          playPauseBtn.innerHTML = '<i class="fas fa-play mr-2"></i> Conectar';
           playPauseBtn.disabled = false;
           playPauseBtn.classList.remove('btn-disabled');
-          
           // Actualizar el botón de reset
           resetBtn.disabled = true;
           resetBtn.classList.add('btn-disabled');
-          
           // Actualizar el estado del botón de edición
           updateEditModeState();
-          
           // Actualizar la hora inmediatamente
           updateClock();
-          
           isTimerRunning = false;
-        };
-        
-        // Función para enviar el reloj
-        const sendClock = () => {
-          // Actualizar UI
-          timerStatus.textContent = "Reloj en marcha";
-          playPauseBtn.innerHTML = '<i class="fas fa-pause mr-2"></i> Pausar';
-          isTimerRunning = true;
           
-          // Mostrar toast
-          showToast("Reloj enviado al dispositivo con éxito", "success", 2000);
-          
-          // Iniciar el intervalo para actualizar la hora
+          // Asegurar que el reloj se actualice visualmente
           if (!clockInterval) {
             clockInterval = setInterval(updateClock, 1000);
           }
+        };
+        
+        // Función para conectar el reloj (simular envío al dispositivo)
+        const connectClock = () => {
+          // Actualizar estado
+          isClockConnected = true;
+          
+          // Actualizar UI
+          timerStatus.textContent = "Tocar pausa para desconectar el dispositivo";
+          playPauseBtn.innerHTML = '<i class="fas fa-pause mr-2"></i> Desconectar';
+          isTimerRunning = true;
+          
+          // Mostrar toast
+          showToast("Reloj conectado al dispositivo con éxito", "success", 2000);
           
           // Bloquear todos los programas
           blockAllPrograms();
         };
         
-        // Función para pausar el reloj
-        const pauseClock = () => {
-          if (clockInterval) {
-            clearInterval(clockInterval);
-            clockInterval = null;
-          }
+        // Función para desconectar el reloj
+        const disconnectClock = () => {
+          // Actualizar estado
+          isClockConnected = false;
           
           // Actualizar UI
-          timerStatus.textContent = "Reloj pausado";
-          playPauseBtn.innerHTML = '<i class="fas fa-play mr-2"></i> Continuar';
+          timerStatus.textContent = "Tocar play servirá para conectar el reloj con el dispositivo";
+          playPauseBtn.innerHTML = '<i class="fas fa-play mr-2"></i> Conectar';
           isTimerRunning = false;
           
           // Mostrar toast
-          showToast("Reloj pausado con éxito", "success", 2000);
+          showToast("Reloj desconectado del dispositivo", "info", 2000);
           
           // Desbloquear todos los programas
           unblockAllPrograms();
@@ -1195,42 +1222,33 @@
             showToast('Detén el timer actual antes de seleccionar otro programa', "error", 2000);
             return;
           }
-          
           // Limpiar cualquier timer activo
           if (isTimerRunning) {
             pauseTimer();
           }
-          
           // Limpiar cualquier reloj activo
           if (clockInterval) {
             clearInterval(clockInterval);
             clockInterval = null;
           }
-          
           // Limpiar estado de programa normal
           currentProgram = null;
-          
           // Actualizar estado
           isClockActive = false;
           isStopwatchActive = true;
-          
           // Actualizar UI
           programName.textContent = "Cronómetro";
           programName.classList.remove('hidden');
           timerDisplay.textContent = stopwatchTime.textContent;
           timerStatus.textContent = "Cronómetro seleccionado";
-          
           // Actualizar los botones
           playPauseBtn.innerHTML = '<i class="fas fa-play mr-2"></i> Iniciar';
           playPauseBtn.disabled = false;
           playPauseBtn.classList.remove('btn-disabled');
-          
           resetBtn.disabled = false;
           resetBtn.classList.remove('btn-disabled');
-          
           // Actualizar el estado del botón de edición
           updateEditModeState();
-          
           isTimerRunning = false;
         };
         
@@ -1238,26 +1256,20 @@
         const startStopwatch = () => {
           stopwatchRunning = true;
           stopwatchStartTime = Date.now() - stopwatchElapsedTime;
-          
           stopwatchInterval = setInterval(() => {
             stopwatchElapsedTime = Date.now() - stopwatchStartTime;
-            
             const totalSeconds = stopwatchElapsedTime / 1000;
             const minutes = Math.floor(totalSeconds / 60);
             const seconds = Math.floor(totalSeconds % 60);
             const centiseconds = Math.floor((totalSeconds * 100) % 100);
-            
             const timeString = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}:${centiseconds.toString().padStart(2, '0')}`;
-            
             stopwatchTime.textContent = timeString;
             timerDisplay.textContent = timeString;
           }, 10);
-          
           // Actualizar UI
           timerStatus.textContent = "Cronómetro en marcha";
           playPauseBtn.innerHTML = '<i class="fas fa-pause mr-2"></i> Pausa';
           isTimerRunning = true;
-          
           // Bloquear todos los programas
           blockAllPrograms();
         };
@@ -1267,12 +1279,10 @@
           stopwatchRunning = false;
           clearInterval(stopwatchInterval);
           stopwatchInterval = null;
-          
           // Actualizar UI
           timerStatus.textContent = "Cronómetro pausado";
           playPauseBtn.innerHTML = '<i class="fas fa-play mr-2"></i> Continuar';
           isTimerRunning = false;
-          
           // Desbloquear todos los programas
           unblockAllPrograms();
         };
@@ -1283,11 +1293,9 @@
           stopwatchInterval = null;
           stopwatchElapsedTime = 0;
           stopwatchRunning = false;
-          
           const timeString = "00:00:00";
           stopwatchTime.textContent = timeString;
           timerDisplay.textContent = timeString;
-          
           // Actualizar UI
           if (isStopwatchActive) {
             timerStatus.textContent = "Cronómetro seleccionado";
@@ -1301,10 +1309,8 @@
           const hours = now.getHours().toString().padStart(2, '0');
           const minutes = now.getMinutes().toString().padStart(2, '0');
           const seconds = now.getSeconds().toString().padStart(2, '0');
-          
           const timeString = `${hours}:${minutes}:${seconds}`;
           currentTime.textContent = timeString;
-          
           // Si el reloj está activo, mostrar la hora en el display principal
           if (isClockActive) {
             timerDisplay.textContent = timeString;
@@ -1319,7 +1325,6 @@
           }
           // Bloquear todos los programas
           blockAllPrograms();
-          
           // Bloquear el botón de edición
           editModeBtn.disabled = true;
           editModeBtn.classList.add('btn-disabled');
@@ -1477,10 +1482,9 @@
             clearInterval(countdownInterval);
             countdownInterval = null;
           }
-          
-          // Si es reloj, pausar el reloj
+          // Si es reloj, manejar la desconexión
           if (isClockActive) {
-            pauseClock();
+            disconnectClock();
           } 
           // Si es cronómetro, pausar el cronómetro
           else if (isStopwatchActive) {
@@ -1505,7 +1509,6 @@
             clearInterval(countdownInterval);
             countdownInterval = null;
           }
-          
           // Si es cronómetro, reiniciar el cronómetro
           if (isStopwatchActive) {
             resetStopwatch();
@@ -1573,6 +1576,12 @@
           dialog.showModal();
         };
         
+        // Mostrar modal de confirmación para eliminar programa
+        const showDeleteConfirmation = (programId) => {
+          programToDelete = programId;
+          confirmDeleteModal.showModal();
+        };
+        
         // Botones
         const newProgramCard = document.querySelector('.new-program-card');
         newProgramCard.addEventListener("click", openCreateModal);
@@ -1606,12 +1615,21 @@
         
         // Botones del timer
         playPauseBtn.addEventListener('click', () => {
+          // Si el reloj está activo
+          if (isClockActive) {
+            if (!isClockConnected) {
+              connectClock();
+            } else {
+              disconnectClock();
+            }
+            return; // Salimos, no ejecutamos la lógica de cronómetro/programa normal
+          }
+          
+          // Lógica original para cronómetro y programas normales
           if (isTimerRunning) {
-            pauseTimer();
+            pauseTimer(); // Esto maneja cronómetro y programas
           } else {
-            if (isClockActive) {
-              sendClock();
-            } else if (isStopwatchActive) {
+            if (isStopwatchActive) {
               startStopwatch();
             } else if (currentProgram) {
               startProgram();
@@ -1620,6 +1638,11 @@
         });
         
         resetBtn.addEventListener('click', () => {
+          // Si es reloj, no hacer nada
+          if (isClockActive) {
+            return;
+          }
+          
           if (currentProgram) {
             resetTimer();
           } else if (isStopwatchActive) {
@@ -1638,13 +1661,26 @@
         
         // Eliminar programa desde el modal
         deleteProgramBtn.addEventListener('click', () => {
-          if (confirm("¿Eliminar este programa?")) {
-            const programs = loadAllPrograms().filter((p) => p.id !== currentProgramId);
+          showDeleteConfirmation(currentProgramId);
+        });
+        
+        // Confirmar eliminación
+        confirmDeleteBtn.addEventListener('click', () => {
+          if (programToDelete) {
+            const programs = loadAllPrograms().filter((p) => p.id !== programToDelete);
             saveAllPrograms(programs);
             renderPrograms();
             dialog.close();
+            confirmDeleteModal.close();
             showToast("Programa eliminado exitosamente", "success", 2000);
+            programToDelete = null;
           }
+        });
+        
+        // Cancelar eliminación
+        cancelDeleteBtn.addEventListener('click', () => {
+          confirmDeleteModal.close();
+          programToDelete = null;
         });
         
         // Guardar programa (crear o editar)
